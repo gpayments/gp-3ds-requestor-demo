@@ -1,0 +1,93 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2019
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication Test</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/style.css">
+
+</head>
+<body>
+
+{{>contents/nav_bar}}
+
+<main role="main">
+
+  <div class="jumbotron">
+    <div class="container">
+      <h1 class="display-1">3DS Requestor</h1>
+      <hr class="mb-4"/>
+      <h5>Welcome to GPayments sample 3DS Requestor website. Check the online shop to see a sample
+        merchant integration, or use the test pages to test ActiveServer's authentication APIs.</h5>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <h2>Online shop</h2>
+        <p>Sample shop to show how a 3DS Requestor is integrated.</p>
+      </div>
+      <div class="col-md-6">
+        <h2>Test pages</h2>
+        <p>Test pages for Browser (BRW) and 3DS Requestor Initiated (3RI) authentications, as well
+          as the 3DS2 enrol check.</p>
+      </div>
+      <div class="col-md-6">
+        <p><a class="btn btn-primary" href="/shop" role="button">Launch &raquo;</a></p>
+      </div>
+      <div class="col-md-6">
+        <div class="row">
+          <div class="col-md-4">
+            <p><a class="btn btn-primary" href="/brw" role="button">BRW test &raquo;</a></p>
+          </div>
+          <div class="col-md-4">
+            <p><a class="btn btn-primary" href="/3ri" role="button">3RI test &raquo;</a></p>
+          </div>
+          <div class="col-md-4">
+            <p><a class="btn btn-primary" href="/enrol" role="button">Enrol test &raquo;</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr>
+  </div> <!-- /container -->
+
+</main>
+<footer class="container">
+  <p>&copy; GPayments Ltd. 2019</p>
+</footer>
+
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+</body>
+</html>

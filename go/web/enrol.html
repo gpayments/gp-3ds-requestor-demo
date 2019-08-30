@@ -1,0 +1,150 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2019
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+</head>
+<body>
+
+{{>contents/nav_bar}}
+
+<div class="container">
+
+  <div class="row h-100 card-row">
+    <div class="col-sm-9">
+
+      <!--Cardholder Information -->
+      <div class="card" id="merchantInfoCard">
+        <div class="card-header">
+          Enrol Information
+        </div>
+
+
+        <div class="card-body">
+          <div id="cardholder-info-div">
+            <div>
+              <h3 class="mb-3">Channel</h3>
+              <br>
+              <dl class="row">
+                <dt class="col-sm-4">Auth API URL <span class="required">*</span></dt>
+                <dd class="col-sm-8">
+                  <input type="text" id="serverUrlToShow" class="form-control" value={{serverUrl}}
+                         disabled/>
+                </dd>
+
+                <dt class="col-sm-4">Requestor URL <span class="required">*</span></dt>
+                <dd class="col-sm-8">
+                  <input type="text" id="callbackUrlToShow" class="form-control"
+                         value={{callbackUrl}} disabled/>
+                </dd>
+              </dl>
+            </div>
+
+            <div>
+              <br>
+              <h3 class="mb-3">Required Field</h3>
+              <hr>
+              <dl class="row">
+                <dt class="col-sm-4">Account Number <span class="required">*</span>
+                </dt>
+                <dd class="col-sm-8">
+                  <input type="text" id="acctNumber" class="form-control"
+                         value="4100000000000100"
+                  />
+                </dd>
+
+                <dt class="col-sm-4">Merchant ID <span class="required">*</span>
+                </dt>
+                <dd class="col-sm-8">
+                  <input type="text" id="merchantId" class="form-control"
+                         value="123456789012345"
+                  />
+                </dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+    <!--Action Button-->
+    <div class="col-sm-3 mb-4">
+      <ul class="list-group mb-3">
+        <div>
+          <button class="btn btn-primary btn-lg btn-block" id="testButton"
+                  onclick="onClick()">Test Enrol
+          </button>
+        </div>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="/js/common.js"></script>
+<script>
+  function onClick() {
+
+    var sessionData = {};
+    sessionData.channel = "enrol";
+    sessionData.authData = genAuthData();
+    sessionData.backButtonType = "toEnrol";
+
+    sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
+
+    window.location.href = "/process";
+
+  }
+
+  function genAuthData() {
+    var authData = {};
+
+    //Required field
+    var acctNumber = $('#acctNumber').val();
+    if (acctNumber) {
+      authData.acctNumber = acctNumber;
+    }
+
+    var merchantId = $('#merchantId').val();
+    if (merchantId) {
+      authData.merchantId = merchantId;
+    }
+
+    return authData;
+  }
+
+</script>
+</body>
+</html>

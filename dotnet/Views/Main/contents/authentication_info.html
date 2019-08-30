@@ -1,0 +1,52 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2019
+  ~
+  ~
+  -->
+
+<!--authenticationInfo-->
+<div id="authentication_info">
+  <br>
+  <h3 class="mb-3">3DS Requestor Authentication Information</h3>
+  <hr>
+  <dl class="row">
+
+    <dt class="col-sm-4">3DS Requestor Authentication Data</dt>
+    <dd class="col-sm-8">
+      <input type="text" id="threeDSReqAuthData" class="form-control"
+             value=""
+      />
+    </dd>
+    <dt class="col-sm-4">3DS Requestor Authentication Method</dt>
+    <dd class="col-sm-8">
+      <select id="threeDSReqAuthMethod" class="form-control">
+        <option value="" selected></option>
+        <option value="01">No authentication occurred (01)</option>
+        <option value="02">Use 3DS Requestor’s own credentials (02)</option>
+        <option value="03">Use federated ID (03)</option>
+        <option value="04">Use issuer credentials (04)</option>
+        <option value="05">Use third-party authentication (05)</option>
+        <option value="06">Use FIDO Authenticator (06)</option>
+      </select>
+    </dd>
+    <dt class="col-sm-4">3DS Requestor Authentication Timestamp</dt>
+    <dd class="col-sm-8">
+      <input type="text" id="threeDSReqAuthTimestamp" class="form-control"
+             value=""
+      />
+    </dd>
+  </dl>
+</div>
+

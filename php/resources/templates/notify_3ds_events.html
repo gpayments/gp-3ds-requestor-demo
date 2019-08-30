@@ -1,0 +1,48 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2019
+  ~
+  ~
+  -->
+
+<!--notify_3ds_events.html-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication</title>
+</head>
+<body>
+
+<form>
+  <input type="hidden" id="notifyCallback" name="notifyCallback" value={{callbackName}}>
+  <input type="hidden" id="transId" name="transId" value={{transId}}>
+  <input type="hidden" id="param" name="param" value={{callbackParam}}>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script>
+  //notify parent check out page to proceed with rest procedures.
+
+  var callbackFn = parent[$('#notifyCallback').val()];
+  //callbackFn is defined in 3ds-notify handler method
+  if (typeof callbackFn === 'function') {
+    callbackFn($('#transId').val(), $('#param').val());
+  }
+</script>
+
+</body>
+</html>
