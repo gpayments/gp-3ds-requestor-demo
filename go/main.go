@@ -182,7 +182,7 @@ func authController(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//add callback event url
 		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
 
-		callASAPI(message, config.GPayments.AsAuthUrl+"/api/v1/auth/brw/init/"+c.Param("messageCategory"), c, httpClient)
+		callASAPI(message, "/api/v1/auth/brw/init/"+c.Param("messageCategory"), c, httpClient, config)
 
 	})
 
@@ -196,7 +196,7 @@ func authController(r *gin.Engine, config *Config, httpClient *http.Client) {
 			return
 		}
 
-		callASAPI(message, config.GPayments.AsAuthUrl+"/api/v1/auth/brw", c, httpClient)
+		callASAPI(message, "/api/v1/auth/brw", c, httpClient, config)
 
 	})
 
@@ -209,7 +209,7 @@ func authController(r *gin.Engine, config *Config, httpClient *http.Client) {
 
 		}
 
-		callASAPI(nil, config.GPayments.AsAuthUrl+"/api/v1/auth/brw/result?threeDSServerTransID="+transId, c, httpClient)
+		callASAPI(nil, "/api/v1/auth/brw/result?threeDSServerTransID="+transId, c, httpClient, config)
 
 	})
 
@@ -223,7 +223,7 @@ func authController(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//adding requestorTransId
 		message["threeDSRequestorTransID"] = uuid.New()
 
-		callASAPI(message, config.GPayments.AsAuthUrl+"/api/v1/auth/3ri/npa", c, httpClient)
+		callASAPI(message, "/api/v1/auth/3ri/npa", c, httpClient, config)
 
 	})
 
@@ -234,7 +234,18 @@ func authController(r *gin.Engine, config *Config, httpClient *http.Client) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		callASAPI(message, config.GPayments.AsAuthUrl+"/api/v1/auth/enrol", c, httpClient)
+		callASAPI(message, "/api/v1/auth/enrol", c, httpClient, config)
+
+	})
+
+	r.POST("/auth/challenge/status", func(c *gin.Context) {
+		var message map[string]interface{}
+		err := c.ShouldBindJSON(&message)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		callASAPI(message, "/api/v1/auth/challenge/status", c, httpClient, config)
 
 	})
 
@@ -251,13 +262,20 @@ func loadTemplate(page string, fp *mustache.FileProvider) *mustache.Template {
 }
 
 //call ActiveServer API, if message == nil, do GET otherwise POST
-func callASAPI(message map[string]interface{}, url string, c *gin.Context, httpClient *http.Client) {
+func callASAPI(message map[string]interface{}, url string, c *gin.Context, httpClient *http.Client, config *Config) {
 
-	var r *http.Response
+	var r *http.Request
 	var err error
 
+	//add ActiveServer base URL
+	url = config.GPayments.AsAuthUrl + url
+
 	if message == nil {
-		r, err = httpClient.Get(url)
+		r, err = http.NewRequest("GET", url, nil)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
 	} else {
 		var data []byte
 		data, err = json.Marshal(message)
@@ -266,26 +284,36 @@ func callASAPI(message map[string]interface{}, url string, c *gin.Context, httpC
 			return
 		}
 
-		r, err = httpClient.Post(url, "application/json;charset=utf-8", bytes.NewBuffer(data))
+		r, err = http.NewRequest("POST", url, bytes.NewBuffer(data))
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		r.Header.Set("Content-Type", "application/json;charset=utf-8")
+
 	}
 
-	defer r.Body.Close()
+	//if this is groupAuth
+	if config.GPayments.GroupAuth {
+		r.Header.Set("AS-Merchant-Token", config.GPayments.MerchantToken)
+	}
+
+	response, err := httpClient.Do(r)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	defer response.Body.Close()
+
+	contentType := response.Header.Get("Content-Type")
+	responseBody, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	response, err := ioutil.ReadAll(r.Body)
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	contentType := r.Header.Get("Content-Type")
-
-	c.Data(http.StatusOK, contentType, response)
+	c.Data(http.StatusOK, contentType, responseBody)
 
 }
 

@@ -23,6 +23,7 @@ class RestClientConfig
     const CA_CERTS_FILE_PATH = "resources/certs/cacerts.pem";
 
     private $client = null;
+    private $headers = [];
 
     public function __construct(Config $config)
     {
@@ -32,6 +33,10 @@ class RestClientConfig
             'ssl_key' => $config->getKeyFileName(),
             "verify" => self::CA_CERTS_FILE_PATH,
         ]);
+
+        if ($config->isGroupAuth()) {
+            $this->headers = array('AS-Merchant-Token' => $config->getMerchantToken());
+        }
     }
 
     function post($request_uri, $post_data)
@@ -39,13 +44,13 @@ class RestClientConfig
         $response = $this->client->request(
             "POST",
             $request_uri,
-             ['json' => $post_data]);
+            ['json' => $post_data, 'headers' => $this->headers]);
         return $response;
     }
 
     function get($request_uri)
     {
-        $response = $this->client->request("GET", $request_uri);
+        $response = $this->client->request("GET", $request_uri, ['headers' => $this->headers]);
         return $response;
     }
 

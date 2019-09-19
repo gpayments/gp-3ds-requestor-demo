@@ -21,4 +21,6 @@ gpayments:
   asAuthUrl: https://api.as.testlab.3dsecure.cloud:7443
   baseUrl: http://localhost:8082
   certFileName: # Client Certificate file (.p12 or .pfx) path
+  groupAuth: false
+  merchantToken: # Your merchantToken when groupAuth = true
 

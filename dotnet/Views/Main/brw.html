@@ -55,6 +55,12 @@
                  role="tab"
                  aria-controls="additionalInfo" aria-selected="false">Additional Risk</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" id="testOptionsTab" data-toggle="tab" href="#testOptions"
+                 role="tab"
+                 aria-controls="testOptions" aria-selected="false">Test Options</a>
+            </li>
+
           </ul>
         </div>
 
@@ -282,6 +288,37 @@
 
               </div>
             </div>
+            <div class="tab-pane fade" id="testOptions" role="tabpanel"
+                 aria-labelledby="testOptionsTab">
+              <div id="test-options-div">
+                <h3 class="mb-3">Challenge Options</h3>
+                <hr>
+                <dl class="row">
+                  <dt class="col-sm-12 text-secondary" style="margin-bottom: .5rem">3DS requestor
+                    can decide whether to proceed the challenge or not. By select the following
+                    checkbox, the requestor will cancel the challenge.
+                  </dt>
+
+                  <dt class="col-sm-4">Cancel Challenge</dt>
+                  <dd class="col-sm-8">
+                    <input type="checkbox" id="cancelChallengeCheckbox"
+                           onchange="toggleCheckbox(this)">
+                  </dd>
+
+                  <dt class="col-sm-4">Cancel Reason</dt>
+                  <dd class="col-sm-8">
+                    <select id="cancelReason" class="form-control" disabled>
+                      <option value="CReqNotSent" selected>CReq Not Sent</option>
+                      <option value="AuthResultNotDelivered">Auth Result Not Delivered</option>
+                      <option value="">No Reason Sent</option>
+                    </select>
+                  </dd>
+                </dl>
+
+
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -319,11 +356,13 @@
     sessionData.authData = genAuthData();
     sessionData.messageCategory = $("input[name=messageCategoryForm]:checked").val();
     sessionData.backButtonType = "toBrw";
+    sessionData.options = getTestOptions();
 
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 
     window.location.href = "/process";
   }
+
 
   function genAuthData() {
     var authData = {};
@@ -429,12 +468,32 @@
       authData.merchantRiskIndicator = merchantRiskIndicator;
     }
     // load merchantName
-    var merchantName =  $('#merchantName').val();
+    var merchantName = $('#merchantName').val();
     if (merchantName) {
       authData.merchantName = merchantName;
     }
 
     return authData;
+  }
+
+  function getTestOptions() {
+    var options = {};
+    if ($("#cancelChallengeCheckbox").prop("checked")) {
+      options.cancelChallenge = true;
+      var cancelReason = $("#cancelReason").val();
+      if (cancelReason) {
+        options.cancelReason = cancelReason;
+      }
+    }
+    return options;
+  }
+
+  function toggleCheckbox(checkbox) {
+    if (checkbox.checked) {
+      $("#cancelReason").prop("disabled", false);
+    } else {
+      $("#cancelReason").prop("disabled", true);
+    }
   }
 
   $(document).ready(function () {

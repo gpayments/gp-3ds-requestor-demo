@@ -24,6 +24,8 @@ class Config
     private $baseUrl;
     private $certFileName;
     private $keyFileName;
+    private $groupAuth;
+    private $merchantToken;
 
     function __construct()
     {
@@ -32,6 +34,8 @@ class Config
         $this->asAuthUrl = $ini_array['asAuthUrl'];
         $this->certFileName = $ini_array['certFileName'];
         $this->keyFileName = $ini_array['keyFileName'];
+        $this->groupAuth = boolval($ini_array['groupAuth']);
+        $this->merchantToken = $ini_array['merchantToken'];
     }
 
     public function getCertFileName()
@@ -55,7 +59,14 @@ class Config
         return $this->keyFileName;
     }
 
+    public function isGroupAuth()
+    {
+        return $this->groupAuth;
+    }
 
-
+    public function getMerchantToken()
+    {
+        return $this->merchantToken;
+    }
 
 }

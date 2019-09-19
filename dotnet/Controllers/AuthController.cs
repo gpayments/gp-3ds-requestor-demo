@@ -76,6 +76,18 @@ namespace GPayments.Requestor.TestLab.Controllers
             return response;
         }
 
+        [HttpPost, Route("auth/challenge/status")]
+        public Message challengeStatus([FromBody]Message request)
+        {
+            String challengeStatusUrl = Config.AsAuthUrl + "/api/v1/auth/challenge/status";
+            logger.Info(string.Format("request challenge status API {0}, body: \n{1}", challengeStatusUrl, request));
+
+            Message response = (Message)RestClientHelper.PostForObject(challengeStatusUrl, request, typeof(Message));
+            logger.Info(string.Format("challengeStatus response: \n{0}", response));
+
+            return response;
+        }
+
         /// <summary>
         /// Receives the Request for authentication result request (Step 15(F) and Step 20(C))
         /// Send data to ActiveServer to Retrieve Authentication Results

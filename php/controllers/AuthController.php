@@ -110,6 +110,15 @@ class AuthController
         $this->_returnJson($response->getBody()->getContents());
     }
 
+    public function challengeStatus()
+    {
+        $requestData = $this->_getJsonData();
+        $challengeStatusUrl = "/api/v1/auth/challenge/status";
+        $response = $this->restTemplate->post($challengeStatusUrl, $requestData);
+        $this->_returnJson($response->getBody()->getContents());
+    }
+
+
     private function _getJsonData()
     {
         $json = file_get_contents('php://input');

@@ -44,6 +44,8 @@ class Router
                 $this->authController->threeRI();
             } else if ($path === "/auth/enrol") {
                 $this->authController->enrol();
+            } else if ($path === "/auth/challenge/status") {
+                $this->authController->challengeStatus();
             }
 
         } else {

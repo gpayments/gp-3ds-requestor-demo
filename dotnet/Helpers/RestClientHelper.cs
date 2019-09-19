@@ -76,6 +76,9 @@ namespace GPayments.Requestor.TestLab.Helpers
                 HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
                 req.Method = "POST";
                 req.ClientCertificates.Add(GetClientCertificate());
+                //the certificate is for groupAuth, work out the header
+                if (Config.GroupAuth)
+                    req.Headers.Add("AS-Merchant-Token", Config.MerchantToken);
                 req.ContentType = "application/json;charset=utf-8";
                 string strRequest = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
                 byte[] postData = System.Text.Encoding.UTF8.GetBytes(strRequest);
@@ -101,6 +104,9 @@ namespace GPayments.Requestor.TestLab.Helpers
                 HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
                 req.Method = "GET";
                 req.ClientCertificates.Add(GetClientCertificate());
+                //the certificate is for groupAuth, work out the header
+                if (Config.GroupAuth)
+                    req.Headers.Add("AS-Merchant-Token", Config.MerchantToken);
                 string result = null;
                 using (StreamReader streamIn = new StreamReader(req.GetResponse().GetResponseStream()))
                     result = streamIn.ReadToEnd();

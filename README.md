@@ -4,9 +4,16 @@ Repository containing the GPayments 3DS Requestor demo code, to be used to integ
 
 For full instructions on using the demo code, please refer to the [documentation](https://docs.activeserver.cloud/en/guides/integration/integration_overview/).
 
+The master branch always contains the latest 3DS Requestor demo code version. For previous versions, check out the [releases tab](https://github.com/gpayments/gp-3ds-requestor-demo/releases). 
+
 ## Release notes
 
-### Version 1.1
+### Version 1.2 (compatible with ActiveServer v1.1.2)
+* Added a [Test Options](http://docs.activeserver.cloud/en/guides/integration/integration-guide/front_end/#continue-challenge-process) page to sample 3DS Requestor, allowing users to not automatically start the challenge process, and optionally send a challenge cancel reason
+* Added code to the 3DS-web-adapter to support the new [challenge status](https://docs.activeserver.cloud/en/api/auth/#/ThreeDS%20Authentication/Update%20Challenge%20Status). Details of the integration can be found on the [front-end](http://docs.activeserver.cloud/en/guides/integration/integration-guide/front_end.md#continue-challenge-process) and [back-end](http://docs.activeserver.cloud/en/guides/integration/integration-guide/back_end.md#cancel-challenge-flow) integration guides.
+* Changed the back-end example code to support the new Master Auth API client certificate functionality. A description of the implementation can be found in the [Auth API Authentication](http://docs.activeserver.cloud/en/api_document_overview.md#auth-api-authentication) and [Demo 3DS Requestor Configuration](http://docs.activeserver.cloud/en/guides/integration/integration-guide/introduction.md#demo-3ds-requestor-configuration) guides 
+
+### Version 1.1 (compatible with ActiveServer v1.1.1)
 * Added test pages for Browser, 3RI and Enrol, to allow full testing of these endpoints with all API parameters
 * Added example code for multiple back-end languages, now supported are Java, C#, PHP and Go
 * Enhanced result page to show more information and error handling

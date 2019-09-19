@@ -1,4 +1,3 @@
-
 /*
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -31,6 +30,8 @@ public class Config {
   private String asAuthUrl;
   private String baseUrl;
   private String certFileName;
+  private boolean groupAuth;
+  private String merchantToken;
 
   public String getBaseUrl() {
     return baseUrl;
@@ -54,5 +55,21 @@ public class Config {
 
   public void setCertFileName(String certFileName) {
     this.certFileName = certFileName;
+  }
+
+  public boolean isGroupAuth() {
+    return groupAuth;
+  }
+
+  public void setGroupAuth(boolean groupAuth) {
+    this.groupAuth = groupAuth;
+  }
+
+  public String getMerchantToken() {
+    return merchantToken;
+  }
+
+  public void setMerchantToken(String merchantToken) {
+    this.merchantToken = merchantToken;
   }
 }

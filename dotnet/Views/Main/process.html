@@ -135,7 +135,8 @@
       //   container: container object for iframe used in 3ds-web-adapter.
       //   _callbackFn: call back function
       //   messageCategory: 'pa' or 'npa'
-      brw(sessionData.authData, container, _callbackFn, sessionData.messageCategory);
+      brw(sessionData.authData, container, _callbackFn, sessionData.messageCategory,
+          sessionData.options);
 
       break;
     case "3ri":

@@ -24,6 +24,9 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,8 +53,8 @@ public class AuthController {
   }
 
   /**
-   * Receives the initialise authentication request from the 3DS-web-adapter (Step 2)
-   * Send data to ActiveServer to Initialise Authentication
+   * Receives the initialise authentication request from the 3DS-web-adapter (Step 2) Send data to
+   * ActiveServer to Initialise Authentication
    */
   @PostMapping("/auth/init/{messageCategory}")
   public Message initAuth(@RequestBody Message request,
@@ -71,7 +74,7 @@ public class AuthController {
     //Send data to ActiveServer to Initialise authentication (Step 3)
     //Get the response data from ActiveServer (Step 4)
     Message response =
-        restTemplate.postForObject(initAuthUrl, request, Message.class);
+        sendRequest(initAuthUrl, request, HttpMethod.POST);
     logger.info("initAuthResponseBRW: \n{}", response);
 
     //Return data to 3ds-web-adapter (Step 5)
@@ -93,16 +96,29 @@ public class AuthController {
     //Send data to ActiveServer to Execute Authentication (Step 10)
     //Get the response data from ActiveServer (Step 12)
     Message response =
-        restTemplate.postForObject(authUrl, request, Message.class);
+        sendRequest(authUrl, request, HttpMethod.POST);
     logger.info("authResponseBRW: \n{}", response);
 
     //Return data to 3ds-web-adapter (Step 13)
     return response;
   }
 
+  @PostMapping("/auth/challenge/status")
+  public Message challengeStatus(@RequestBody Message request) {
+
+    String challengeStatusUrl = config.getAsAuthUrl() + "/api/v1/auth/challenge/status";
+    logger.info("request challenge status API {}, body: \n{}", challengeStatusUrl, request);
+
+    Message response =
+        sendRequest(challengeStatusUrl, request, HttpMethod.POST);
+    logger.info("challengeStatus response: \n{}", response);
+
+    return response;
+  }
+
   /**
-   * Receives the Request for authentication result request (Step 15(F) and Step 20(C))
-   * Send data to ActiveServer to Retrieve Authentication Results
+   * Receives the Request for authentication result request (Step 15(F) and Step 20(C)) Send data to
+   * ActiveServer to Retrieve Authentication Results
    */
   @GetMapping("/auth/result")
   public Message result(@RequestParam("txid") String serverTransId) {
@@ -113,7 +129,8 @@ public class AuthController {
         serverTransId;
 
     //Get authentication result from ActiveServer (Step 16(F) and Step 21(C))
-    Message response = restTemplate.getForObject(resultUrl, Message.class);
+    Message response =
+        sendRequest(resultUrl, null, HttpMethod.GET);
     logger.info("authResponse: \n{}", response);
 
     //Show authentication results on result.html (Step 17(F) and Step 22(C))
@@ -131,7 +148,7 @@ public class AuthController {
     logger.info("authRequest3RI on url: {}, body: \n{}", threeRIUrl, request);
 
     Message response =
-        restTemplate.postForObject(threeRIUrl, request, Message.class);
+        sendRequest(threeRIUrl, request, HttpMethod.POST);
     logger.info("authResponse3RI: \n{}", response);
     return response;
   }
@@ -143,8 +160,40 @@ public class AuthController {
     logger.info("enrol on url: {}, body: \n{}", enrolUrl, request);
 
     Message response =
-        restTemplate.postForObject(enrolUrl, request, Message.class);
+        sendRequest(enrolUrl, request, HttpMethod.POST);
     logger.info("enrolResponse: \n{}", response);
     return response;
+  }
+
+  /**
+   * Send request to ActiveServer, if groupAuth is enabled, workout the required header.
+   */
+  private Message sendRequest(String url, Message request, HttpMethod method) {
+
+    HttpEntity<Message> req;
+    HttpHeaders headers = null;
+
+    if (config.isGroupAuth()) {
+      //the certificate is for groupAuth, work out the header.
+      headers = new HttpHeaders();
+      headers.add("AS-Merchant-Token", config.getMerchantToken());
+    }
+
+    switch (method) {
+      case POST:
+        req = new HttpEntity<>(request, headers);
+        return restTemplate.postForObject(url, req, Message.class);
+      case GET:
+        if (headers == null) {
+          return restTemplate.getForObject(url, Message.class);
+        } else {
+          req = new HttpEntity<>(headers);
+          return restTemplate.exchange(url, HttpMethod.GET, req, Message.class).getBody();
+        }
+      default:
+        return null;
+    }
+
+
   }
 }

@@ -24,8 +24,10 @@ namespace GPayments.Requestor.TestLab.Helpers
 {
     public class Config
     {
-        public static string AsAuthUrl { get { return ConfigurationManager.AppSettings["AsAuthUrl"] ?? "https://api.as.testlab.3dsecure.cloud:7443"; } }
-        public static string BaseUrl { get { return ConfigurationManager.AppSettings["BaseUrl"] ?? "http://localhost:8082"; } }
-        public static string CertFileName { get { return ConfigurationManager.AppSettings["CertFileName"] ?? "<Full file name and path of the client certificate>"; } }
+        public static string AsAuthUrl { get { return ConfigurationManager.AppSettings["AsAuthUrl"] ?? ""; } }
+        public static string BaseUrl { get { return ConfigurationManager.AppSettings["BaseUrl"] ?? ""; } }
+        public static string CertFileName { get { return ConfigurationManager.AppSettings["CertFileName"] ?? ""; } }
+        public static bool GroupAuth { get { return Convert.ToBoolean(ConfigurationManager.AppSettings["GroupAuth"] ?? "false"); } }
+        public static string MerchantToken { get { return ConfigurationManager.AppSettings["MerchantToken"] ?? ""; } }
     }
 }

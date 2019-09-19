@@ -46,16 +46,25 @@ var iframeContainer;
 var iframeId;
 
 /**
+ * other options
+ */
+var _options = {};
+
+/**
  * Perform Browser-based authentication
  * @param authData
  * @param messageCategory
  * @param container: iframe container
  * @param callbackFn: callback function to return data
+ * @param options: other options
  */
-function brw(authData, container, callbackFn, messageCategory) {
+function brw(authData, container, callbackFn, messageCategory, options) {
 
   _callbackFn = callbackFn;
   iframeContainer = container;
+  if (options) {
+    _options = options;
+  }
   //generate an random number for iframe Id
   iframeId = String(Math.floor(100000 + Math.random() * 900000));
 
@@ -65,7 +74,7 @@ function brw(authData, container, callbackFn, messageCategory) {
     if (messageCategory === "pa" || messageCategory === "npa") {
       initAuthUrl = "/auth/init/" + messageCategory;
     } else {
-      _callbackFn("onError", {"Error": "Invalid messageCategory"});
+      _onError({"Error": "Invalid messageCategory"});
     }
   } else {
     initAuthUrl = "/auth/init/" + "pa";
@@ -74,7 +83,7 @@ function brw(authData, container, callbackFn, messageCategory) {
   console.log('init authentication', authData);
 
   //Send data to /auth/init/{messageCategory} to do Initialise authentication (Step 2)
-  doPost(initAuthUrl, authData, _onInitAuthSuccess);
+  doPost(initAuthUrl, authData, _onInitAuthSuccess, _onError);
 }
 
 /**
@@ -85,7 +94,7 @@ function brw(authData, container, callbackFn, messageCategory) {
 function threeRI(authData, callbackFn) {
   _callbackFn = callbackFn;
   console.log('3ri: ', authData);
-  doPost("/auth/3ri", authData, _on3RISuccess);
+  doPost("/auth/3ri", authData, _on3RISuccess, _onError);
 }
 
 /**
@@ -96,7 +105,7 @@ function threeRI(authData, callbackFn) {
 function enrol(authData, callbackFn) {
   _callbackFn = callbackFn;
   console.log('enrol: ', authData);
-  doPost("/auth/enrol", authData, _onEnrolSuccess);
+  doPost("/auth/enrol", authData, _onEnrolSuccess, _onError);
 }
 
 /**
@@ -113,8 +122,9 @@ function result(threeDSServerTransID, callbackFn) {
  * @param url
  * @param authData
  * @param onSuccess
+ * @param onError
  */
-function doPost(url, authData, onSuccess) {
+function doPost(url, authData, onSuccess, onError) {
   $.ajax({
     url: url,
     type: 'POST',
@@ -125,7 +135,7 @@ function doPost(url, authData, onSuccess) {
       onSuccess(data);
     },
     error: function (error) {
-      _callbackFn("onError", error.responseJSON);
+      onError(error.responseJSON);
     }
   });
 }
@@ -144,14 +154,14 @@ function _onInitAuthSuccess(data) {
     $('<iframe id="' + "3ds_" + iframeId
         + '" width="0" height="0" style="visibility: hidden;" src="'
         + data.threeDSServerCallbackUrl + '"></iframe>')
-        .appendTo(iframeContainer);
+    .appendTo(iframeContainer);
 
   } else {
-    _callbackFn("onError", data);
+    _onError(data);
   }
 
   if (data.monUrl) {
-      // optionally append the monitoring iframe
+    // optionally append the monitoring iframe
     $('<iframe id="' + "mon_" + iframeId
         + '" width="0" height="0" style="visibility: hidden;" src="'
         + data.monUrl + '"></iframe>')
@@ -175,7 +185,7 @@ function _doAuth(transId) {
   authData.threeDSRequestorTransID = transId;
   authData.threeDSServerTransID = serverTransId;
 
-  doPost("/auth", authData, _onDoAuthSuccess);
+  doPost("/auth", authData, _onDoAuthSuccess, _onError);
 }
 
 /**
@@ -189,13 +199,27 @@ function _onDoAuthSuccess(data) {
   if (data.transStatus) {
     if (data.transStatus === "C") {
       // 3D requestor can decide whether to proceed the challenge here
-      data.challengeUrl ? startChallenge(data.challengeUrl) : _callbackFn(
-          "onError", {"Error": "Invalid Challenge Callback Url"});
+      if (_options.cancelChallenge) {
+        if (_options.cancelReason) {
+          var sendData = {};
+          sendData.threeDSServerTransID = serverTransId;
+          sendData.status = _options.cancelReason;
+          doPost("/auth/challenge/status", sendData, _onCancelSuccess,
+              _onCancelError)
+        } else {
+          var returnData = _cancelMessage();
+          _callbackFn("onAuthResult", returnData);
+        }
+      } else {
+        data.challengeUrl ? startChallenge(data.challengeUrl) : _onError(
+            {"Error": "Invalid Challenge Callback Url"});
+      }
+
     } else {
       _callbackFn("onAuthResult", data);
     }
   } else {
-    _callbackFn("onError", data);
+    _onError(data);
   }
 }
 
@@ -212,6 +236,38 @@ function startChallenge(url) {
       + '"></iframe>')
   .appendTo(iframeContainer);
 
+}
+
+function _onCancelSuccess(data) {
+
+  if (data.threeDSServerTransID) {
+    var returnData = _cancelMessage();
+    Object.keys(data).forEach(function (k) {
+      returnData[k] = data[k];
+    });
+    _callbackFn("onAuthResult", returnData);
+  } else {
+    _onCancelError(data);
+  }
+
+}
+
+function _onCancelError(data) {
+  var returnData = _cancelMessage();
+  Object.keys(data).forEach(function (k) {
+    returnData[k] = data[k];
+  });
+  _onError(returnData);
+}
+
+function _cancelMessage() {
+  var returnData = {"Challenge cancelled": "You can get further challenge results by select the \"Show results in separate page\" button after at least 30 seconds"};
+  if (_options.cancelReason) {
+    returnData["Cancel reason"] = _options.cancelReason;
+  } else {
+    returnData["Cancel reason"] = "Not sent";
+  }
+  return returnData;
 }
 
 /**
@@ -273,7 +329,7 @@ function _onInitAuthTimedOut(transId) {
       + 'information collecting failed'
       + ' now terminating the authentication process. transId=', transId);
 
-  _callbackFn("onError", {"Error": "InitAuth timeout"});
+  _onError({"Error": "InitAuth timeout"});
 }
 
 /**
@@ -286,7 +342,7 @@ function _on3RISuccess(data) {
   if (data.transStatus) {
     _callbackFn("on3RIResult", data);
   } else {
-    _callbackFn("onError", data);
+    _onError(data);
   }
 }
 
@@ -300,7 +356,14 @@ function _onEnrolSuccess(data) {
   if (data.enrolmentStatus) {
     _callbackFn("onEnrolResult", data);
   } else {
-    _callbackFn("onError", data);
+    _onError(data);
   }
+}
+
+function _onError(error) {
+  if (error.status === 404) {
+    error["New feature"] = "This feature is only supported by ActiveServer v1.1.2+";
+  }
+  _callbackFn("onError", error);
 }
 
