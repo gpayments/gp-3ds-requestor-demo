@@ -1,0 +1,212 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!--Cardholder Information -->
+
+<div id="cardholder-info-div">
+  <div>
+
+    <h3 class="mb-3">Card details</h3>
+    <hr>
+    <dl class="row">
+      <dt class="col-sm-4">Card Holder Name</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="cardholderName" class="form-control"
+               value="Test Card"
+        />
+      </dd>
+
+      <dt class="col-sm-4">Email</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="email" class="form-control"
+               value="abc@123.com"
+        />
+      </dd>
+
+      <dt class="col-sm-4">Mobile Number</dt>
+      <dd class="col-sm-2">
+        <input type="text" id="mobileNumberCountryCode" class="form-control"
+               value="61"
+        />
+      </dd>
+      <dd class="col-sm-6">
+        <input type="text" id="mobileNumberSubscriber" class="form-control"
+               value="0421522329"
+        />
+      </dd>
+
+      <dt class="col-sm-4">Home Phone</dt>
+      <dd class="col-sm-2">
+        <input type="text" id="homeNumberCountryCode" class="form-control"
+               value=""
+        />
+      </dd>
+      <dd class="col-sm-6">
+        <input type="text" id="homeNumberSubscriber" class="form-control"
+               value=""
+        />
+      </dd>
+
+      <dt class="col-sm-4">Work Phone</dt>
+      <dd class="col-sm-2">
+        <input type="text" id="workNumberCountryCode" class="form-control"
+               value=""
+        />
+      </dd>
+      <dd class="col-sm-6">
+        <input type="text" id="workNumberSubscriber" class="form-control"
+               value=""
+        />
+      </dd>
+    </dl>
+  </div>
+
+
+  <div>
+    <br>
+    <h3 class="card-title">Billing details</h3>
+    <hr>
+    <dl class="row">
+
+      <dt class="col-sm-4">Address Line 1</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrLine1" class="form-control"
+               value="Unit 1"
+        />
+      </dd>
+      <dt class="col-sm-4">Address Line 2</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrLine2" class="form-control"
+               value="123 Street"
+        />
+      </dd>
+      <dt class="col-sm-4">Address Line 3</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrLine3" class="form-control"
+               value=""
+        />
+      </dd>
+      <dt class="col-sm-4">City</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrCity" class="form-control"
+               value="Sydney"
+        />
+      </dd>
+      <dt class="col-sm-4">State</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrState" class="form-control"
+               value="NSW"
+        />
+      </dd>
+      <dt class="col-sm-4">ZIP</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrPostCode" class="form-control"
+               value="2000"
+        />
+      </dd>
+      <dt class="col-sm-4">Country Code</dt>
+      <dd class="col-sm-8">
+        <input type="text" id="billAddrCountry" class="form-control"
+               value="036"
+        />
+      </dd>
+
+    </dl>
+  </div>
+
+  <hr>
+
+  <div class="row">
+
+    <dt class="col-sm-12">Is this address also your shipping address?</dt>
+    <div class="col-sm-1"></div>
+    <div class="col-sm-11">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="shipping-radios"
+               id="shipping-radio-yes"
+               value="option1" onclick="showAdvancedDetails(false)" checked>
+        <label class="form-check-label" for="shipping-radio-yes">
+          Yes
+        </label>
+      </div>
+    </div>
+    <div class="col-sm-1"></div>
+    <div class="col-sm-11">
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="shipping-radios"
+               id="shipping-radio-no"
+               value="option2" onclick="showAdvancedDetails(true)">
+        <label class="form-check-label" for="shipping-radio-no">
+          No
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div id="advanced-details" class="d-none">
+    <div>
+      <br>
+      <h3 class="card-title">Shipping details</h3>
+      <hr>
+      <d1 class="row">
+        <dt class="col-sm-4">Address Line 1</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrLine1" class="form-control"
+                 value="Unit 1"
+          />
+        </dd>
+        <dt class="col-sm-4">Address Line 2</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrLine2" class="form-control"
+                 value="123 Street"
+          />
+        </dd>
+        <dt class="col-sm-4">Address Line 3</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrLine3" class="form-control"
+                 value=""
+          />
+        </dd>
+        <dt class="col-sm-4">City</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrCity" class="form-control"
+                 value="Sydney"
+          />
+        </dd>
+        <dt class="col-sm-4">State</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrState" class="form-control"
+                 value="NSW"
+          />
+        </dd>
+        <dt class="col-sm-4">ZIP</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrPostCode" class="form-control"
+                 value="2000"
+          />
+        </dd>
+        <dt class="col-sm-4">Country Code</dt>
+        <dd class="col-sm-8">
+          <input type="text" id="shipAddrCountry" class="form-control"
+                 value="036"
+          />
+        </dd>
+      </d1>
+    </div>
+  </div>
+</div>

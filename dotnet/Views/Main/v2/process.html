@@ -1,0 +1,161 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+
+<!--Retrieve process head using mustache template-->
+{{>contents/process_head}}
+<body>
+
+<!--Retrieve navigation bar using mustache template-->
+{{>contents/nav_bar}}
+
+<!--Retrieve process body using mustache template-->
+{{>contents/process_main_body}}
+
+{{>contents/deps}}
+<script src="/js/check-credit-card-type.js"></script>
+<script src="/js/v2/3ds-web-adapter.js"></script>
+<script>
+
+  /**
+   * Get sessionData from sessionStorage. SessionData should be stored from your shop or test pages.
+   * In this example, sessionData contains:
+   *    1. channel: 'brw', '3ri'
+   *    2. authData: all the necessary data in JSON format (For data structure, please refer to the API document).
+   *    3. backButtonType: indicate the 'back' button in the process page
+   *    4. messageCategory: used in 'brw' channel.
+   *       Either 'pa' - payment authentication or 'npa' - non-payment authentication.
+   *       Default using 'pa' if user don't specify messageCategory.
+   */
+  var sessionData = JSON.parse(sessionStorage.getItem("sessionData"));
+  console.log("sessionData: ", sessionData);
+  if (sessionData.authData.acctNumber) {
+    showCardLogo(sessionData.authData.acctNumber);
+  }
+  updateBackButton(sessionData.backButtonType);
+
+  /**
+   * All 3ds2 requests handled in process.html page.
+   * Including 'Browser-based authentication (brw)' and '3DS Requestor Initiated (3ri)'.
+   */
+  switch (sessionData.channel) {
+    case "brw":
+      var container = $('#iframeDiv');
+
+      //call 'brw()' function in 3ds-web-adapter to perform Browser-based authentication (Step 1)
+      //parameters:
+      //   authData: data for authentication
+      //   container: container object for iframe used in 3ds-web-adapter.
+      //   _callbackFn: call back function
+      brw(sessionData.authData, container, _callbackFn,
+          sessionData.options);
+
+      break;
+    case "3ri":
+
+      // call 'threeRI()' fucntion in 3ds-web-adapter to perform 3DS Requestor Initiated
+      threeRI(sessionData.authData, _callbackFn);
+
+      break;
+    default:
+      showError({"Error": "Invalid channel"});
+      break;
+  }
+
+  /**
+   * Callback function for 3ds-web-adapter.
+   * This function should be implemented by merchant side to handle callback from 3ds-web-adapter.
+   * Two parameters expected: type and data.
+   * @param type. Indicate the type of event. Values accepted:
+   *                    onAuthResult: indicate an auth result
+   *                    on3RIResult: indicate an 3ri result
+   *                    onChallengeStart: indicate to start a challenge
+   *                    onError: indicate an error
+   * @param data. The data returned from 3ds-web-adapter. Data contains either the result of 'auth', '3ri', or the error message.
+   */
+  function _callbackFn(type, data) {
+
+    switch (type) {
+      case "onAuthResult":
+        //display "Show results in separate page"
+        $("#sepButton").removeClass("d-none");
+        showResult(data);
+        break;
+
+      case "on3RIResult":
+        showResult(data);
+        break;
+
+      case "onChallengeStart":
+        //remove the spinner to show the challenge window
+        $(".spinner").remove();
+        break;
+
+      case "onError":
+        showError(data);
+        break;
+
+      default:
+        showError({"Error": "Unknown callback type"});
+        break;
+    }
+  }
+
+  function showResult(data) {
+
+    $("#test-result-headline").addClass("text-success");
+    showData(data);
+  }
+
+  function showError(error) {
+
+    $("#test-result-headline").addClass("text-danger");
+    showData(error);
+  }
+
+  function showData(data) {
+    if (data.transStatusReason) {
+      data.transStatusReason = formatTransStatusReason(data.transStatusReason);
+    }
+
+    var toShow = "<dl class='row'>";
+    Object.keys(data).forEach(function (k) {
+      toShow = toShow + "<dt class='col-sm-4'>" + k + "</dt>" + "<dd class='col-sm-8'>" + data[k]
+          + "</dd>";
+    });
+    toShow += "</dl>";
+    $('#showResult').html(toShow);
+    $("#checkoutCard").remove();
+    $("#resultCard").removeClass("d-none");
+  }
+
+  /**
+   * call url /result to get result  (Step 15(F) or Step 20(C))
+   */
+  function openResultInNewWindow() {
+    if (serverTransId) {
+      var url = '/v2/result';
+
+      sessionStorage.setItem("serverTransId", serverTransId);
+      window.open(url, 'newwindow', 'height=800,width=1000');
+    }
+  }
+</script>
+</body>
+</html>

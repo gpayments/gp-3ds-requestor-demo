@@ -1,0 +1,68 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+</head>
+<body>
+
+<div class="container">
+  <div class="card d-none" id="resultCard">
+    <div class="card-header">Test Results</div>
+    <div class="card-body">
+      <h4 class="card-title text-success" id="test-result-headline">Test result values are displayed
+        below</h4>
+      <p class="card-text">These values would generally be used to start the authorisation
+        process. Select the "Back" button to restart this process.</p>
+      <div id="showResult"></div>
+    </div>
+  </div>
+</div>
+
+{{>contents/deps}}
+<script src="/js/v1/3ds-web-adapter.js"></script>
+<script>
+  var serverTransId = sessionStorage.getItem("serverTransId");
+
+  //send request for authentication result (Step 15(F) or Step 20(C))
+  result(serverTransId, showData);
+
+  //show result in separate page (Step 17(F) or Step 22(C))
+  function showData(type, data) {
+    var toShow = "<dl class='row'>";
+    Object.keys(data).forEach(function (k) {
+      toShow = toShow + "<dt class='col-sm-4'>" + k + "</dt>" + "<dd class='col-sm-8'>" + data[k]
+          + "</dd>";
+    });
+    toShow += "</dl>";
+    $('#showResult').empty().append(toShow);
+    $("#resultCard").removeClass("d-none");
+  }
+</script>
+</body>
+</html>
