@@ -43,6 +43,9 @@ class AuthControllerV2
         $requestData->eventCallbackUrl = $this->config->getBaseUrl() . "/3ds-notify";
 
         //ActiveServer url for Initialise Authentication
+        //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+        //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
+        //For more details, refer to: https://docs.activeserver.cloud
         $initAuthUrl = "/api/v2/auth/brw/init";
         //Send data to ActiveServer to Initialise authentication (Step 3)
         //Get the response data from ActiveServer (Step 4)

@@ -219,6 +219,9 @@ func authControllerV1(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//add callback event url
 		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
 
+    //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+    //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
+    //For more details, refer to: https://docs.activeserver.cloud
 		callASAPI(message, "/api/v1/auth/brw/init/"+c.Param("messageCategory"), c, httpClient, config, nil)
 
 	})
@@ -294,6 +297,9 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//add callback event url
 		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
 
+    //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+    //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
+    //For more details, refer to: https://docs.activeserver.cloud
 		callASAPI(message, "/api/v2/auth/brw/init", c, httpClient, config, func(resp []byte) error {
 			//store the response in current session.
 

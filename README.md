@@ -8,6 +8,9 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 1.4 (compatible with ActiveServer v1.3.3)
+* Added code comments to explain the Directory Server (DS) switching functionality between card scheme production DS and GPayments TestLabs DS  
+
 ### Version 1.3 (compatible with ActiveServer v1.3.0)
 * Added functionality to support the **ActiveServer** Authentication API v2
   * Updated the **Java**, **.NET**, **PHP** and **Go** backends and the **3DS-web-adaptor** frontend to have separate v1 and v2 implementations

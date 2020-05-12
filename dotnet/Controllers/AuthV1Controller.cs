@@ -42,6 +42,9 @@ namespace GPayments.Requestor.TestLab.Controllers
             request["eventCallbackUrl"] = callBackUrl;
 
             //ActiveServer url for Initialise Authentication
+            //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+            //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
+            //For more details, refer to: https://docs.activeserver.cloud
             string initAuthUrl = Config.AsAuthUrl + "/api/v1/auth/brw/init/" + messageCategory;
             logger.Info(string.Format("initAuthRequest on url: {0}, body: \n{1}", initAuthUrl, request));
 

@@ -68,6 +68,14 @@ public class AuthControllerV2 {
 
     //ActiveServer url for Initialise Authentication
     String initAuthUrl = config.getAsAuthUrl() + "/api/v2/auth/brw/init";
+
+    //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+    //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
+    //For more details, refer to: https://docs.activeserver.cloud
+    if ("prod".equals(config.getTransType())) {
+      initAuthUrl = initAuthUrl + "?trans-type=prod";
+    }
+
     logger.info("initAuthRequest on url: {}, body: \n{}", initAuthUrl, request);
 
     //Send data to ActiveServer to Initialise authentication (Step 3)

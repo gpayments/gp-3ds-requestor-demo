@@ -32,6 +32,7 @@ public class Config {
   private String certFileName;
   private boolean groupAuth;
   private String merchantToken;
+  private String transType;
 
   public String getBaseUrl() {
     return baseUrl;
@@ -71,5 +72,13 @@ public class Config {
 
   public void setMerchantToken(String merchantToken) {
     this.merchantToken = merchantToken;
+  }
+
+  public String getTransType() {
+    return transType;
+  }
+
+  public void setTransType(String transType) {
+    this.transType = transType;
   }
 }
