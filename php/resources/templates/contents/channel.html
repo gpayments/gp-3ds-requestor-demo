@@ -1,0 +1,52 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<div id="channel">
+
+  <h3 class="mb-3">Channel</h3>
+  <hr>
+
+  <dl class="row">
+    <dt class="col-sm-4">Auth API URL <span class="required">*</span></dt>
+    <dd class="col-sm-8">
+      <input type="text" id="serverUrlToShow" class="form-control"
+             value={{serverUrl}} disabled/>
+    </dd>
+
+    <dt class="col-sm-4">Requestor URL <span class="required">*</span></dt>
+    <dd class="col-sm-8">
+      <input type="text" id="callbackUrlToShow" class="form-control"
+             value={{callbackUrl}} disabled/>
+    </dd>
+
+    <dt class="col-sm-4">Directory Server <span class="required">*</span>
+    </dt>
+    <dd class="col-sm-8">
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="dsChannelForm"
+               id="trans-type-testlab" value="testlab" checked>
+        <label class="form-check-label" for="trans-type-testlab">TestLab</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="dsChannelForm"
+               id="trans-type-prod" value="prod">
+        <label class="form-check-label" for="trans-type-prod">Production</label>
+      </div>
+    </dd>
+  </dl>
+</div>

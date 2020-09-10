@@ -19,7 +19,6 @@
 package com.gpayments.requestor.testlab;
 
 import com.gpayments.requestor.testlab.config.Config;
-import com.gpayments.requestor.testlab.dto.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +26,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -102,6 +99,15 @@ public class MainController {
     return "3ri";
   }
 
+  @GetMapping("/app")
+  public String app(Model model) {
+
+    model.addAttribute("callbackUrl", config.getBaseUrl());
+    model.addAttribute("serverUrl", config.getAsAuthUrl());
+
+    return "app";
+  }
+
   @GetMapping("/v1/result")
   public String resultV1() {
     return "v1/result";
@@ -147,15 +153,4 @@ public class MainController {
     return "notify_3ds_events";
   }
 
-  @PostMapping("/auth/enrol")
-  @ResponseBody
-  public Message enrolTest(@RequestBody Message request) {
-
-    String enrolUrl = config.getAsAuthUrl() + "/api/v1/auth/enrol";
-    logger.info("enrol on url: {}, body: \n{}", enrolUrl, request);
-
-    Message response = restTemplate.postForObject(enrolUrl, request, Message.class);
-    logger.info("enrolResponse: \n{}", response);
-    return response;
-  }
 }

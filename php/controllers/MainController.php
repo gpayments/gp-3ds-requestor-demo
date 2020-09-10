@@ -40,6 +40,14 @@ class MainController
         $this->_render("shop");
     }
 
+    public function app()
+    {
+        $this->model["callbackUrl"] = $this->config->getBaseUrl();
+        $this->model["serverUrl"] = $this->config->getAsAuthUrl();
+        $this->_render("app");
+    }
+
+
     public function checkout()
     {
         $this->_render("checkout");
@@ -130,13 +138,5 @@ class MainController
 
         echo $m->render($template, $this->model);
         exit;
-    }
-
-    public function enrolCheck()
-    {
-        $requestData = Utils::_getJsonData();
-        $enrolUrl = "/api/v1/auth/enrol";
-        $response = $this->restTemplate->post($enrolUrl, $requestData);
-        Utils::_returnJson($response->getBody()->getContents());
     }
 }

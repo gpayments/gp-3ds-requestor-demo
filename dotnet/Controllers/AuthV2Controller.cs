@@ -33,7 +33,7 @@ namespace GPayments.Requestor.TestLab.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost, Route("v2/auth/init")]
-        public Message initAuth([FromBody]Message request)
+        public Message initAuth([FromBody]Message request, [FromUri(Name = "trans-type")] string transType = null)
         {
             //Generate requestor trans ID
             string transId = Guid.NewGuid().ToString();
@@ -47,6 +47,10 @@ namespace GPayments.Requestor.TestLab.Controllers
             //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
             //For more details, refer to: https://docs.activeserver.cloud
             string initAuthUrl = Config.AsAuthUrl + "/api/v2/auth/brw/init";
+
+            if ("prod".Equals(transType))
+                initAuthUrl = initAuthUrl + "?trans-type=prod";
+
             logger.Info(string.Format("initAuthRequest on url: {0}, body: \n{1}", initAuthUrl, request));
 
             //Send data to ActiveServer to Initialise authentication (Step 3)
@@ -108,7 +112,6 @@ namespace GPayments.Requestor.TestLab.Controllers
         [HttpGet, Route("v2/auth/result")]
         public Message authResult(String txid)
         {
-       
             string serverTransId = txid;
             //ActiveServer url for Retrieve Results
             string resultUrl = Config.AsAuthUrl + "/api/v2/auth/brw/result?threeDSServerTransID=" + serverTransId;
@@ -121,17 +124,59 @@ namespace GPayments.Requestor.TestLab.Controllers
         }
 
         [HttpPost, Route("v2/auth/3ri")]
-        public Message threeRITest([FromBody] Message request)
+        public Message threeRITest([FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
         {
             //generate requestor trans ID
             String transId = Guid.NewGuid().ToString();
             request["threeDSRequestorTransID"] = transId;
 
             String threeRIUrl = Config.AsAuthUrl + "/api/v2/auth/3ri";
+
+            //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
+            if ("prod".Equals(transType))
+                threeRIUrl = threeRIUrl + "?trans-type=prod";
+
             logger.Info(string.Format("authRequest3RI on url: {0}, body: \n{1}", threeRIUrl, request));
 
             Message response = (Message)RestClientHelper.PostForObject(threeRIUrl, request, typeof(Message));
             logger.Info(string.Format("authResponse3RI: \n{0}", response));
+            return response;
+        }
+
+        [HttpPost, Route("v2/auth/app")]
+        public Message app([FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
+        {
+            //generate requestor trans ID
+            String transId = Guid.NewGuid().ToString();
+            request["threeDSRequestorTransID"] = transId;
+
+            String appAuthUrl = Config.AsAuthUrl + "/api/v2/auth/app";
+
+            //Add parameter trans-type=prod in the appAuthUrl to use prod DS, otherwise use testlab DS
+            //For more details, refer to: https://docs.activeserver.cloud
+            if ("prod".Equals(transType))
+                appAuthUrl = appAuthUrl + "?trans-type=prod";
+
+            logger.Info(string.Format("appAuthRequest on url: {0}, body: \n{1}", appAuthUrl, request));
+
+            Message response = (Message)RestClientHelper.PostForObject(appAuthUrl, request, typeof(Message));
+            logger.Info(string.Format("appAuthResponse: \n{0}", response));
+            return response;
+        }
+
+        [HttpPost, Route("v2/auth/enrol")]
+        public Message enrolTest([System.Web.Http.FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
+        {
+            String enrolUrl = Config.AsAuthUrl + "/api/v1/auth/enrol";
+
+            //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
+            if ("prod".Equals(transType))
+                enrolUrl = enrolUrl + "?trans-type=prod";
+
+            logger.Info(string.Format("enrol on url: {0}, body: \n{1}", enrolUrl, request));
+
+            Message response = (Message)RestClientHelper.PostForObject(enrolUrl, request, typeof(Message));
+            logger.Info(string.Format("enrolResponse: \n{0}", response));
             return response;
         }
     }

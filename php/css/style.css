@@ -144,3 +144,8 @@
 .cartlink {
   display: none
 }
+
+.highlight {
+  background-color: #f7f7f9;
+  padding: 1.5rem 0.75rem;;
+}

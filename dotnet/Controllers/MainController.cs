@@ -83,6 +83,15 @@ namespace GPayments.Requestor.TestLab.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public ActionResult app()
+        {
+            dynamic model = new ExpandoObject();
+            model.callbackUrl = Config.BaseUrl;
+            model.serverUrl = Config.AsAuthUrl;
+            return View(model);
+        }
+
         [HttpGet, Route("v1/result")]
         public ActionResult ResultV1()
         {
@@ -109,6 +118,8 @@ namespace GPayments.Requestor.TestLab.Controllers
                 callbackName = "_on3DSMethodSkipped";
             else if ("AuthResultReady".Equals(callbackType))
                 callbackName = "_onAuthResult";
+            else if ("InitAuthTimedOut".Equals(callbackType))
+                callbackName = "_onInitAuthTimedOut";
             else
                 throw new ArgumentException("invalid callback type");
 

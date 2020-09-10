@@ -135,8 +135,8 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AuthV1Controller.cs" />
     <Compile Include="Controllers\AuthV2Controller.cs" />
-    <Compile Include="Controllers\EnrollController.cs" />
     <Compile Include="Controllers\MainController.cs" />
+    <Compile Include="exception\GlobalExceptionHandler.cs" />
     <Compile Include="Helpers\Config.cs" />
     <Compile Include="Models\dto\Message.cs" />
     <Compile Include="Global.asax.cs">
@@ -168,14 +168,17 @@
     <Content Include="js\common.js" />
     <Content Include="js\test-lab-scenarios.js" />
     <Content Include="Views\Main\3ri.html" />
+    <Content Include="Views\Main\app.html" />
     <Content Include="Views\Main\brw.html" />
     <Content Include="Views\Main\checkout.html" />
     <Content Include="Views\Main\contents\acct_info.html" />
     <Content Include="Views\Main\contents\authentication_info.html" />
     <Content Include="Views\Main\contents\cardholder_info.html" />
+    <Content Include="Views\Main\contents\channel.html" />
     <Content Include="Views\Main\contents\deps.html" />
     <Content Include="Views\Main\contents\merchant_risk_indicator.html" />
     <Content Include="Views\Main\contents\nav_bar.html" />
+    <Content Include="Views\Main\contents\prior_auth_info.html" />
     <Content Include="Views\Main\contents\process_head.html" />
     <Content Include="Views\Main\contents\process_main_body.html" />
     <Content Include="Views\Main\enrol.html" />

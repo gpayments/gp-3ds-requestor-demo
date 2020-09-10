@@ -2,11 +2,16 @@
 
 Repository containing the GPayments 3DS Requestor demo code, to be used to integrate with [**GPayments ActiveServer**](https://www.gpayments.com/solutions/3ds-server-activeserver/).
 
-For full instructions on using the demo code, please refer to the [documentation](https://docs.activeserver.cloud/en/guides/integration/integration_overview/).
+For full instructions on using the demo code, please refer contact GPayments at techsupport@gpayments.com.
 
 The master branch always contains the latest 3DS Requestor demo code version. For previous versions, check out the [releases tab](https://github.com/gpayments/gp-3ds-requestor-demo/releases). 
 
 ## Release notes
+
+### Version 1.5 (compatible with ActiveServer v1.4.0)
+* Added a **Directory Server** selection field on the test pages to allow sending the transaction to either the Testlab or Production directory server
+* Added an **App test page** with mock authentication data for APP channel testing
+* Fixed the error stacktrace being shown when using a Master Auth API client certificate on a DS unsupported merchant for the dotnet backend
 
 ### Version 1.4 (compatible with ActiveServer v1.3.3)
 * Added code comments to explain the Directory Server (DS) switching functionality between card scheme production DS and GPayments TestLabs DS  

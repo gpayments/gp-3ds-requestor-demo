@@ -28,6 +28,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/kr/pretty"
 	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -82,6 +83,7 @@ func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
 	indexTpl := loadTemplate("web/index.html", fp)
 	shopTpl := loadTemplate("web/shop.html", fp)
 	brwTpl := loadTemplate("web/brw.html", fp)
+	appTpl := loadTemplate("web/app.html", fp)
 	threeRiTpl := loadTemplate("web/3ri.html", fp)
 	enrolTpl := loadTemplate("web/enrol.html", fp)
 	checkoutTpl := loadTemplate("web/checkout.html", fp)
@@ -106,6 +108,13 @@ func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
 			"callbackUrl": config.GPayments.BaseUrl,
 			"serverUrl":   config.GPayments.AsAuthUrl,
 		}, brwTpl, c)
+	})
+
+	r.GET("/app", func(c *gin.Context) {
+		renderPage(gin.H{
+			"callbackUrl": config.GPayments.BaseUrl,
+			"serverUrl":   config.GPayments.AsAuthUrl,
+		}, appTpl, c)
 	})
 
 	r.GET("/3ri", func(c *gin.Context) {
@@ -189,17 +198,6 @@ func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
 		}, notify3DSEventsTpl, c)
 	})
 
-	r.POST("/auth/enrol", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		callASAPI(message, "/api/v1/auth/enrol", c, httpClient, config, nil)
-
-	})
-
 }
 
 //AuthController routers v1
@@ -219,10 +217,10 @@ func authControllerV1(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//add callback event url
 		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
 
-    //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
-    //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
-    //For more details, refer to: https://docs.activeserver.cloud
-		callASAPI(message, "/api/v1/auth/brw/init/"+c.Param("messageCategory"), c, httpClient, config, nil)
+		//Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+		//For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
+		//For more details, refer to: https://docs.activeserver.cloud
+		callASAPI(message, appendTransTypeIfNecessary("/api/v1/auth/brw/init/"+c.Param("messageCategory"), c), c, httpClient, config, nil)
 
 	})
 
@@ -263,7 +261,7 @@ func authControllerV1(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//adding requestorTransId
 		message["threeDSRequestorTransID"] = uuid.New()
 
-		callASAPI(message, "/api/v1/auth/3ri/npa", c, httpClient, config, nil)
+		callASAPI(message, appendTransTypeIfNecessary("/api/v1/auth/3ri/npa", c), c, httpClient, config, nil)
 
 	})
 
@@ -275,6 +273,17 @@ func authControllerV1(r *gin.Engine, config *Config, httpClient *http.Client) {
 			return
 		}
 		callASAPI(message, "/api/v1/auth/challenge/status", c, httpClient, config, nil)
+
+	})
+
+	r.POST("/v1/auth/enrol", func(c *gin.Context) {
+		var message map[string]interface{}
+		err := c.ShouldBindJSON(&message)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		callASAPI(message, appendTransTypeIfNecessary("/api/v1/auth/enrol", c), c, httpClient, config, nil)
 
 	})
 
@@ -297,10 +306,10 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//add callback event url
 		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
 
-    //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
-    //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
-    //For more details, refer to: https://docs.activeserver.cloud
-		callASAPI(message, "/api/v2/auth/brw/init", c, httpClient, config, func(resp []byte) error {
+		//Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
+		//For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
+		//For more details, refer to: https://docs.activeserver.cloud
+		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/brw/init", c), c, httpClient, config, func(resp []byte) error {
 			//store the response in current session.
 
 			authUrl, err := getAuthUrl(resp)
@@ -350,6 +359,20 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client) {
 
 	})
 
+	r.POST("/v2/auth/app", func(c *gin.Context) {
+		var message map[string]interface{}
+		err := c.ShouldBindJSON(&message)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		//adding requestorTransId
+		message["threeDSRequestorTransID"] = uuid.New()
+
+		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/app", c), c, httpClient, config, nil)
+
+	})
+
 	r.POST("/v2/auth/3ri", func(c *gin.Context) {
 		var message map[string]interface{}
 		err := c.ShouldBindJSON(&message)
@@ -360,7 +383,7 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client) {
 		//adding requestorTransId
 		message["threeDSRequestorTransID"] = uuid.New()
 
-		callASAPI(message, "/api/v2/auth/3ri", c, httpClient, config, nil)
+		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/3ri", c), c, httpClient, config, nil)
 
 	})
 
@@ -375,6 +398,17 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client) {
 
 	})
 
+	r.POST("/v2/auth/enrol", func(c *gin.Context) {
+		var message map[string]interface{}
+		err := c.ShouldBindJSON(&message)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/enrol", c), c, httpClient, config, nil)
+
+	})
 }
 
 //return the authUrl from initAuthResponse, v2 only
@@ -419,6 +453,8 @@ func callASAPIWithUrl(
 
 	var r *http.Request
 	var err error
+
+	log.Println("Calling 3DS Server, url: " + url)
 
 	if message == nil {
 		r, err = http.NewRequest("GET", url, nil)
@@ -484,5 +520,17 @@ func renderPage(data map[string]interface{}, tpl *mustache.Template, c *gin.Cont
 	}
 
 	c.Data(http.StatusOK, "text/html", []byte(page))
+
+}
+
+//check and append trans type to the destination url if the trans type parameter is provided
+func appendTransTypeIfNecessary(url string, c *gin.Context) string {
+	p, ok := c.GetQuery("trans-type")
+
+	if ok && "prod" == p {
+		return url + "?trans-type=prod"
+	} else {
+		return url
+	}
 
 }

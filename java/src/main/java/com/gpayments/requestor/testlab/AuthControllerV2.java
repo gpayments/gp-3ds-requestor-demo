@@ -57,7 +57,9 @@ public class AuthControllerV2 {
    * ActiveServer to Initialise Authentication
    */
   @PostMapping("/v2/auth/init")
-  public Message initAuth(@RequestBody Message request, HttpSession session) {
+  public Message initAuth(
+      @RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request, HttpSession session) {
 
     //Generate requestor trans ID
     String transId = UUID.randomUUID().toString();
@@ -72,7 +74,7 @@ public class AuthControllerV2 {
     //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
     //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
     //For more details, refer to: https://docs.activeserver.cloud
-    if ("prod".equals(config.getTransType())) {
+    if ("prod".equals(transType)) {
       initAuthUrl = initAuthUrl + "?trans-type=prod";
     }
 
@@ -95,7 +97,6 @@ public class AuthControllerV2 {
     //Return data to 3ds-web-adapter (Step 5)
     return response;
   }
-
 
   /**
    * Receives the Execute authentication request from the 3DS-web-adapter (Step 9) Send data to
@@ -153,17 +154,67 @@ public class AuthControllerV2 {
 
 
   @PostMapping("/v2/auth/3ri")
-  public Message threeRITest(@RequestBody Message request) {
+  public Message threeRITest(@RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request) {
     //generate requestor trans ID
     String transId = UUID.randomUUID().toString();
     request.put("threeDSRequestorTransID", transId);
 
     String threeRIUrl = config.getAsAuthUrl() + "/api/v2/auth/3ri";
+
+    //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
+    if ("prod".equals(transType)) {
+      threeRIUrl = threeRIUrl + "?trans-type=prod";
+    }
+
     logger.info("authRequest3RI on url: {}, body: \n{}", threeRIUrl, request);
 
     Message response =
         sendRequest(threeRIUrl, request, HttpMethod.POST);
     logger.info("authResponse3RI: \n{}", response);
+    return response;
+  }
+
+  @PostMapping("/v2/auth/app")
+  public Message app(@RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request) {
+
+    //generate requestor trans ID
+    String transId = UUID.randomUUID().toString();
+    request.put("threeDSRequestorTransID", transId);
+
+    String appAuthUrl = config.getAsAuthUrl() + "/api/v2/auth/app";
+
+    //Add parameter trans-type=prod in the appAuthUrl to use prod DS, otherwise use testlab DS
+    //For more details, refer to: https://docs.activeserver.cloud
+    if ("prod".equals(transType)) {
+      appAuthUrl = appAuthUrl + "?trans-type=prod";
+    }
+
+    logger.info("appAuthRequest on url: {}, body: \n{}", appAuthUrl, request);
+
+    Message response =
+        sendRequest(appAuthUrl, request, HttpMethod.POST);
+    logger.info("appAuthResponse: \n{}", response);
+    return response;
+  }
+
+  @PostMapping("/v2/auth/enrol")
+  public Message enrolTest(@RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request) {
+
+    String enrolUrl = config.getAsAuthUrl() + "/api/v2/auth/enrol";
+
+    //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
+    if ("prod".equals(transType)) {
+      enrolUrl = enrolUrl + "?trans-type=prod";
+    }
+
+    logger.info("enrol on url: {}, body: \n{}", enrolUrl, request);
+
+    Message response =
+        sendRequest(enrolUrl, request, HttpMethod.POST);
+    logger.info("enrolResponse: \n{}", response);
     return response;
   }
 

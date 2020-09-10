@@ -14,6 +14,7 @@
 * Written by GPayments<techsupport@gpayments.com>, 2020
 ************************************************************************/
 
+using GPayments.Requestor.TestLab.exception;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,6 +27,7 @@ namespace GPayments.Requestor.TestLab
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
+            config.Filters.Add(new GlobalExceptionHandler());
 
             // Web API routes
             config.MapHttpAttributeRoutes();

@@ -57,7 +57,8 @@ public class AuthControllerV1 {
    * ActiveServer to Initialise Authentication
    */
   @PostMapping("/v1/auth/init/{messageCategory}")
-  public Message initAuth(@RequestBody Message request,
+  public Message initAuth(@RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request,
       @PathVariable(value = "messageCategory") String messageCategory) {
 
     //Generate requestor trans ID
@@ -73,8 +74,8 @@ public class AuthControllerV1 {
     //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
     //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
     //For more details, refer to: https://docs.activeserver.cloud
-    if ("prod".equals(config.getTransType())) {
-      initAuthUrl = initAuthUrl + "/?trans-type=prod";
+    if ("prod".equals(transType)) {
+      initAuthUrl = initAuthUrl + "?trans-type=prod";
     }
 
     logger.info("initAuthRequest on url: {}, body: \n{}", initAuthUrl, request);
@@ -147,17 +148,43 @@ public class AuthControllerV1 {
 
 
   @PostMapping("/v1/auth/3ri")
-  public Message threeRITest(@RequestBody Message request) {
+  public Message threeRITest(@RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request) {
     //generate requestor trans ID
     String transId = UUID.randomUUID().toString();
     request.put("threeDSRequestorTransID", transId);
 
     String threeRIUrl = config.getAsAuthUrl() + "/api/v1/auth/3ri/" + "npa";
+
+    //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
+    if ("prod".equals(transType)) {
+      threeRIUrl = threeRIUrl + "?trans-type=prod";
+    }
+
     logger.info("authRequest3RI on url: {}, body: \n{}", threeRIUrl, request);
 
     Message response =
         sendRequest(threeRIUrl, request, HttpMethod.POST);
     logger.info("authResponse3RI: \n{}", response);
+    return response;
+  }
+
+  @PostMapping("/v1/auth/enrol")
+  public Message enrolTest(@RequestParam(value = "trans-type", required = false) String transType,
+      @RequestBody Message request) {
+
+    String enrolUrl = config.getAsAuthUrl() + "/api/v1/auth/enrol";
+
+    //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
+    if ("prod".equals(transType)) {
+      enrolUrl = enrolUrl + "?trans-type=prod";
+    }
+
+    logger.info("enrol on url: {}, body: \n{}", enrolUrl, request);
+
+    Message response =
+        sendRequest(enrolUrl, request, HttpMethod.POST);
+    logger.info("enrolResponse: \n{}", response);
     return response;
   }
 

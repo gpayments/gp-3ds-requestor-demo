@@ -47,23 +47,7 @@
 
         <div class="card-body">
           <div id="cardholder-info-div">
-            <div>
-              <h3 class="mb-3">Channel</h3>
-              <br>
-              <dl class="row">
-                <dt class="col-sm-4">Auth API URL <span class="required">*</span></dt>
-                <dd class="col-sm-8">
-                  <input type="text" id="serverUrlToShow" class="form-control" value={{serverUrl}}
-                         disabled/>
-                </dd>
-
-                <dt class="col-sm-4">Requestor URL <span class="required">*</span></dt>
-                <dd class="col-sm-8">
-                  <input type="text" id="callbackUrlToShow" class="form-control"
-                         value={{callbackUrl}} disabled/>
-                </dd>
-              </dl>
-            </div>
+            {{>contents/channel}}
 
             <div>
               <br>
@@ -106,12 +90,9 @@
     <div class="col-lg-3 mb-4">
       <ul class="list-group mb-3">
         <div>
-          <button class="btn btn-primary btn-lg btn-block" id="testButton"
-                  onclick="onClickEnrol()">Test Enrol
-          </button>
-          <button class="btn btn-primary btn-lg btn-block d-none" id="backButton"
-                  onclick="onClickBack()">Back to Enrol
-          </button>
+          <div class="btn-group btn-block" id="do3DS">
+            <!--button to do 3ds method-->
+          </div>
         </div>
       </ul>
     </div>
@@ -121,24 +102,32 @@
 
 {{>contents/deps}}
 <script>
+  showActionButton("testButton", "Test Enrol", "onClick");
+  genApiOption();
 
-  function onClickEnrol() {
+  function onClick() {
 
-    var authData = genAuthData();
+    var sessionData = {};
+    sessionData.channel = "enrol";
+    sessionData.authData = genAuthData();
+    sessionData.backButtonType = "toEnrol";
+    sessionData.transType = $("input[name=dsChannelForm]:checked").val();
 
-    $.ajax({
-      url: "/auth/enrol",
-      type: 'POST',
-      contentType: "application/json",
-      data: JSON.stringify(authData),
-      dataType: 'json',
-      success: function (data) {
-        showData(data);
-      },
-      error: function (error) {
-        showData(error.responseJSON);
-      }
-    });
+    sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
+
+    var apiVersion = getApiVersion();
+    switch (apiVersion) {
+      case "v1":
+        window.location.href = "/v1/process";
+        break;
+      case "v2":
+        window.location.href = "/v2/process";
+        break;
+      default:
+        window.location.href = "/v2/process";
+        break;
+
+    }
 
   }
 
@@ -159,30 +148,6 @@
     return authData;
   }
 
-  function showData(data) {
-
-    var toShow = "<dl class='row'>";
-    Object.keys(data).forEach(function (k) {
-      toShow = toShow + "<dt class='col-sm-4'>" + k + "</dt>" + "<dd class='col-sm-8'>" + data[k]
-          + "</dd>";
-    });
-    toShow += "</dl>";
-    var resultDiv = $('#showResult');
-    resultDiv.empty();
-    resultDiv.html(toShow);
-    $("#resultCard").removeClass("d-none");
-    $("#merchantInfoCard").addClass("d-none");
-    $("#testButton").addClass("d-none");
-    $("#backButton").removeClass("d-none");
-  }
-
-  function onClickBack() {
-    $("#resultCard").addClass("d-none");
-    $("#merchantInfoCard").removeClass("d-none");
-    $("#testButton").removeClass("d-none");
-    $("#backButton").addClass("d-none");
-
-  }
 </script>
 </body>
 </html>

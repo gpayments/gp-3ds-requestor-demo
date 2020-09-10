@@ -64,14 +64,20 @@
       //   container: container object for iframe used in 3ds-web-adapter.
       //   _callbackFn: call back function
       //   messageCategory: 'pa' or 'npa'
+      //   transType: transType=prod to use production directory server
       brw(sessionData.authData, container, _callbackFn, sessionData.messageCategory,
-          sessionData.options);
+          sessionData.options, sessionData.transType);
 
       break;
     case "3ri":
 
       // call 'threeRI()' fucntion in 3ds-web-adapter to perform 3DS Requestor Initiated
-      threeRI(sessionData.authData, _callbackFn);
+      threeRI(sessionData.authData, _callbackFn, sessionData.transType);
+
+      break;
+    case "enrol":
+      // call 'enrol()' fucntion in 3ds-web-adapter to perform Enrol
+      enrol(sessionData.authData, _callbackFn, sessionData.transType);
 
       break;
     default:
@@ -100,6 +106,10 @@
         break;
 
       case "on3RIResult":
+        showResult(data);
+        break;
+
+      case "onEnrolResult":
         showResult(data);
         break;
 

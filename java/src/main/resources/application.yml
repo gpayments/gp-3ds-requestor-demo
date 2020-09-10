@@ -23,5 +23,5 @@ gpayments:
   certFileName: # Client Certificate file (.p12 or .pfx) path
   groupAuth: false
   merchantToken: # Your merchantToken when groupAuth = true
-  transType: # Use prod DS when transType = prod, otherwise use testlab DS. More details, refer to https://docs.activeserver.cloud
+
 

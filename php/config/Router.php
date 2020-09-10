@@ -47,6 +47,8 @@ class Router
                 $this->authControllerV1->threeRI();
             } else if ($path === "/v1/auth/challenge/status") {
                 $this->authControllerV1->challengeStatus();
+            } else if ($path === "/v1/auth/enrol") {
+                $this->authControllerV1->enrolCheck();
             }
 
         } else if (startsWith($path, '/v2/auth')) {
@@ -60,6 +62,10 @@ class Router
                 $this->authControllerV2->threeRI();
             } else if ($path === "/v2/auth/challenge/status") {
                 $this->authControllerV2->challengeStatus();
+            } else if ($path === "/v2/auth/app") {
+                $this->authControllerV2->app();
+            } else if ($path === "/v2/auth/enrol") {
+                $this->authControllerV2->enrolCheck();
             }
         } else {
             if (empty($path) || $path === "/") {
@@ -86,6 +92,8 @@ class Router
                 $this->mainController->notifyResult();
             } else if ($path === "/auth/enrol") {
                 $this->mainController->enrolCheck();
+            } else if ($path === "/app") {
+                $this->mainController->app();
             }
 
         }

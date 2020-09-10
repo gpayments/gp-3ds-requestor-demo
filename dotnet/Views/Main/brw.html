@@ -70,40 +70,7 @@
                  aria-labelledby="basicInfoTab">
               <div id="required-info-div">
 
-                <div>
-
-                  <h3 class="mb-3">Channel</h3>
-                  <hr>
-
-                  <dl class="row">
-                    <dt class="col-sm-4">Auth API URL <span class="required">*</span></dt>
-                    <dd class="col-sm-8">
-                      <input type="text" id="serverUrlToShow" class="form-control"
-                             value={{serverUrl}} disabled/>
-                    </dd>
-
-                    <dt class="col-sm-4">Requestor URL <span class="required">*</span></dt>
-                    <dd class="col-sm-8">
-                      <input type="text" id="callbackUrlToShow" class="form-control"
-                             value={{callbackUrl}} disabled/>
-                    </dd>
-
-                    <dt class="col-sm-4">Message Category <span class="required">*</span>
-                    </dt>
-                    <dd class="col-sm-8">
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="messageCategoryForm"
-                               id="mess-cate-pa" value="pa" checked>
-                        <label class="form-check-label" for="mess-cate-pa">Payment Auth</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="messageCategoryForm"
-                               id="mess-cate-npa" value="npa">
-                        <label class="form-check-label" for="mess-cate-npa">Non-payment Auth</label>
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
+                {{>contents/channel}}
 
                 <div>
                   <br>
@@ -162,6 +129,21 @@
                         <option value="05">Maintain card (05)</option>
                         <option value="06">Cardholder verification (06)</option>
                       </select>
+                    </dd>
+
+                    <dt class="col-sm-4">Message Category <span class="required">*</span>
+                    </dt>
+                    <dd class="col-sm-8">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="messageCategoryForm"
+                               id="mess-cate-pa" value="pa" checked>
+                        <label class="form-check-label" for="mess-cate-pa">Payment Auth</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="messageCategoryForm"
+                               id="mess-cate-npa" value="npa">
+                        <label class="form-check-label" for="mess-cate-npa">Non-payment Auth</label>
+                      </div>
                     </dd>
                   </dl>
                 </div>
@@ -378,6 +360,7 @@
   function goApiV1() {
     var sessionData = genSessionData();
     sessionData.messageCategory = $("input[name=messageCategoryForm]:checked").val();
+    sessionData.transType = $("input[name=dsChannelForm]:checked").val();
 
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 
@@ -387,6 +370,7 @@
   function goApiV2() {
     var sessionData = genSessionData();
     sessionData.authData.messageCategory = $("input[name=messageCategoryForm]:checked").val();
+    sessionData.transType = $("input[name=dsChannelForm]:checked").val();
 
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 

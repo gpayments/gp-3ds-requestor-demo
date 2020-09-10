@@ -42,11 +42,18 @@ class AuthControllerV2
         //Fill the event call back url with requestor url + /3ds-notify
         $requestData->eventCallbackUrl = $this->config->getBaseUrl() . "/3ds-notify";
 
+        $transType = $_GET["trans-type"];
+
         //ActiveServer url for Initialise Authentication
         //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
         //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
         //For more details, refer to: https://docs.activeserver.cloud
         $initAuthUrl = "/api/v2/auth/brw/init";
+
+        if (!empty($transType) && $transType == "prod") {
+            $initAuthUrl = $initAuthUrl."?trans-type=prod";
+        }
+
         //Send data to ActiveServer to Initialise authentication (Step 3)
         //Get the response data from ActiveServer (Step 4)
         $response = $this->restTemplate->post($initAuthUrl, $requestData);
@@ -98,6 +105,13 @@ class AuthControllerV2
         $requestData->threeDSRequestorTransID = Utils::_getUUId();
 
         $threeRIUrl = "/api/v2/auth/3ri";
+
+        $transType = $_GET["trans-type"];
+
+        if (!empty($transType) && $transType == "prod") {
+            $threeRIUrl = $threeRIUrl."?trans-type=prod";
+        }
+
         $response = $this->restTemplate->post($threeRIUrl, $requestData);
 
         //Return data to 3ds-web-adapter (Step 13)
@@ -111,4 +125,36 @@ class AuthControllerV2
         $response = $this->restTemplate->post($challengeStatusUrl, $requestData);
         Utils::_returnJson($response->getBody()->getContents());
     }
+
+
+    public function app()
+    {
+        $requestData = Utils::_getJsonData();
+        $authAppUrl = "/api/v2/auth/app";
+
+        $transType = $_GET["trans-type"];
+
+        if (!empty($transType) && $transType == "prod") {
+            $authAppUrl = $authAppUrl."?trans-type=prod";
+        }
+
+        $response = $this->restTemplate->post($authAppUrl, $requestData);
+        Utils::_returnJson($response->getBody()->getContents());
+    }
+
+    public function enrolCheck()
+    {
+        $requestData = Utils::_getJsonData();
+        $enrolUrl = "/api/v2/auth/enrol";
+        $transType = $_GET["trans-type"];
+
+        if (!empty($transType) && $transType == "prod") {
+            $enrolUrl = $enrolUrl."?trans-type=prod";
+        }
+
+        $response = $this->restTemplate->post($enrolUrl, $requestData);
+        Utils::_returnJson($response->getBody()->getContents());
+    }
+
+
 }

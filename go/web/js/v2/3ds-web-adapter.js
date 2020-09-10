@@ -62,8 +62,9 @@ var _options = {};
  * @param container: iframe container
  * @param callbackFn: callback function to return data
  * @param options: other options
+ * @param transType: transType=prod to use production directory server
  */
-function brw(authData, container, callbackFn, options) {
+function brw(authData, container, callbackFn, options, transType) {
 
   _callbackFn = callbackFn;
   iframeContainer = container;
@@ -79,6 +80,11 @@ function brw(authData, container, callbackFn, options) {
   //3DS Requestor url for Initialise Authentication
   var initAuthUrl = "/v2/auth/init";
 
+  //add trans-type=prod to use production directory server. More details, refer to https://docs.activeserver.cloud
+  if (transType === "prod") {
+    initAuthUrl = initAuthUrl + "?trans-type=prod";
+  }
+
   var initAuthData = {};
   initAuthData.acctNumber = authData.acctNumber;
   initAuthData.merchantId = authData.merchantId;
@@ -90,14 +96,53 @@ function brw(authData, container, callbackFn, options) {
 }
 
 /**
+ * Perform App-based authentication
+ * @param authData
+ * @param callbackFn: callback function to return data
+ * @param transType: transType=prod to use production directory server
+ */
+function app(authData, callbackFn, transType) {
+  _callbackFn = callbackFn;
+
+  var appUrl = "/v2/auth/app";
+  //add trans-type=prod to use production directory server. More details, refer to https://docs.activeserver.cloud
+  if (transType === "prod") {
+    appUrl = appUrl + "?trans-type=prod";
+  }
+
+  doPost(appUrl, authData, _onAppSuccess, _onError);
+}
+
+/**
  * Send data to url /auth/3ri to do 3RI
  * @param authData
  * @param callbackFn
+ * @param transType
  */
-function threeRI(authData, callbackFn) {
+function threeRI(authData, callbackFn, transType) {
+  var threeRIUrl = "/v2/auth/3ri";
+  if (transType === "prod") {
+    threeRIUrl = threeRIUrl + "?trans-type=prod";
+  }
   _callbackFn = callbackFn;
   console.log('3ri: ', authData);
-  doPost("/v2/auth/3ri", authData, _on3RISuccess, _onError);
+  doPost(threeRIUrl, authData, _on3RISuccess, _onError);
+}
+
+/**
+ * Send data to url /auth/enrol to do enrol
+ * @param authData
+ * @param callbackFn
+ * @param transType
+ */
+function enrol(authData, callbackFn, transType) {
+  var enrolUrl = "/v2/auth/enrol";
+  if (transType === "prod") {
+    enrolUrl = enrolUrl + "?trans-type=prod";
+  }
+  _callbackFn = callbackFn;
+  console.log('enrol: ', authData);
+  doPost(enrolUrl, authData, _onEnrolSuccess, _onError);
 }
 
 /**
@@ -335,6 +380,34 @@ function _on3RISuccess(data) {
   console.log('returns:', data);
   if (data.transStatus) {
     _callbackFn("on3RIResult", data);
+  } else {
+    _onError(data);
+  }
+}
+
+/**
+ * callback function for enrol()
+ * @param data
+ * @private
+ */
+function _onEnrolSuccess(data) {
+  console.log('returns:', data);
+  if (data.enrolmentStatus) {
+    _callbackFn("onEnrolResult", data);
+  } else {
+    _onError(data);
+  }
+}
+
+/**
+ * callback function for threeRI()
+ * @param data
+ * @private
+ */
+function _onAppSuccess(data) {
+  console.log('returns:', data);
+  if (data.transStatus) {
+    _callbackFn("onAppResult", data);
   } else {
     _onError(data);
   }

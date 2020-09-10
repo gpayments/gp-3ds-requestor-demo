@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css"/>
+  <link rel="stylesheet" href="css/spinner.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+</head>
+<body>
+
+{{>contents/nav_bar}}
+
+<div class="container">
+  <div class="row h-100 card-row">
+    <div class="col-sm-9">
+      <!--Cardholder Information -->
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="appTestInfoTab" data-toggle="tab" href="#appTestInfo"
+                 role="tab"
+                 aria-controls="appTestInfo" aria-selected="true">App Test Info</a>
+            </li>
+          </ul>
+        </div>
+
+
+        <div class="card-body">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="appTestInfo" role="tabpanel"
+                 aria-labelledby="appTestInfoTab">
+              <div id="required-info-div">
+                {{>contents/channel}}
+              </div>
+
+              <h3 class="mb-3">Auth data</h3>
+              <dt class="text-secondary" style="margin-bottom: .5rem">
+                Below is the mock AReq for APP channel authentication. This data is only for
+                test/demo purposes. For a production authentication, APP auth requests must be
+                initiated by an integrated 3DS SDK.
+              </dt>
+              <hr>
+              <textarea class="form-control" id="inputArea" rows="15"
+                        aria-label="Json input"></textarea>
+              <br>
+              <div class="row">
+                <div class="col-md-6"><h3 class="mb-3">Response</h3></div>
+                <div class="col-md-6"><img class="w-25 float-right" id="cardLogo" src="" alt=""
+                                           style="height:50px"/></div>
+              </div>
+              <hr>
+              <div id="outputDiv" class="highlight">
+                <pre id="outputArea"></pre>
+              </div>
+              <div id="iframeDiv"></div>
+              <div id="spinner"
+                   class="spinner row h-20 justify-content-center align-items-center d-none">
+                <div class="col">
+                  <div class="sk-fading-circle">
+                    <div class="sk-circle1 sk-circle"></div>
+                    <div class="sk-circle2 sk-circle"></div>
+                    <div class="sk-circle3 sk-circle"></div>
+                    <div class="sk-circle4 sk-circle"></div>
+                    <div class="sk-circle5 sk-circle"></div>
+                    <div class="sk-circle6 sk-circle"></div>
+                    <div class="sk-circle7 sk-circle"></div>
+                    <div class="sk-circle8 sk-circle"></div>
+                    <div class="sk-circle9 sk-circle"></div>
+                    <div class="sk-circle10 sk-circle"></div>
+                    <div class="sk-circle11 sk-circle"></div>
+                    <div class="sk-circle12 sk-circle"></div>
+                  </div>
+                  <div class="text-center"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+
+    <!--Action Button-->
+    <div class="col-sm-3 mb-4">
+      <div>
+        <button class="btn btn-primary btn-lg btn-block" id="testButton"
+                onclick="onClick()">Test App
+        </button>
+        <button class="btn btn-primary btn-lg btn-block d-none" id="processButton" type="button"
+                disabled>
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          Processing...
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/check-credit-card-type.js"></script>
+<script src="/js/v2/3ds-web-adapter.js"></script>
+<script>
+
+  var authData = {
+    acctNumber: "4100000000000100",
+    authenticationInd: "01",
+    merchantId: "123456789012345",
+    purchaseAmount: 66600,
+    purchaseCurrency: "036",
+    acctID: "personal account",
+    acctType: "01",
+    cardExpiryDate: "2508",
+    transType: "01",
+    challengeInd: "01",
+    purchaseDate: "20200409093228",
+    messageCategory: "pa",
+  };
+
+  //Following sdkEncData, sdkEphemPubKey, and etc are only for test/demo purpose. In real application, APP auth requests must be initiated by an integrated SDK.
+  authData.sdkAppID = uuid_gen();
+  authData.sdkEncData = "eyJhbGciOiJSU0EtT0FFUC0yNTYiLCJlbmMiOiJBMTI4R0NNIiwia2lkIjoiZGU3NjU1YmUtM2Q2Zi00ODAyLTlkNjgtYzM2YTlkMjNlNzFjIn0.sHh9jiTD4nP_AtEIN8GX5-2YYm5Zcf6WJmptFY2_my4qgQVAfWPpRaazHeo_3jYQKMLbAatRO243Jtfs-0YuF0JrnSkdLYsILBK4n99Y4tWsIJqb5Z-GshFOaKNxrrjJu3DpTjojjou1wrLn_m1mwtlWMwLympwDL_fE4rkYrBrtJxH9JE3d9hIX5eTaIS70935yDPFrWiQpxOVAmsCQdgT4eWw2rLU98U0JqyUF1EdOMf4tJzxaE26e-9bXuW8I8Br8i9FbTIy0l2IuYXjHxa7V9_ntLmYh-PKU0Y-DGg8pPuDy8kYJ3eoToXbzE7CHtd7JWQcA0knLtXCsbwolcg.F6LaLl_wf4E9NGjb.uF4Eag8vFYpvtSL0ZzdkgH4Bl13Yspa3MSBDXa9jEBVjzggRXobu-zB1JMro3VsKnhtiTbIS9JyVDCUMS6eY0oU1UFdpaXcLdtz3hAL_Xt-xb6badklNM4ztVjfVE6YA8-s58Nc4M7ACjD8EEUuGhRLjCL97dR9WN3NA__hJqYWuVKm95VHcLjbAq-PXIJXXuNQEvh8spG6Pl1d_Zwwjv1urYyqpYf71PAtJR4etiH2JyxVxBTnpKd6xCe5gny6ZaDKgnfbWY047X2UJdWuEQxCOzfD2AV65PGo2ecvGFTTyGeQqlxvky3hvyikDqdU7Czh6Imp1xQYiIo4tGlMkeQaHB5gB2uDIBhNXS646BnxMItYysZCHeDVL-Bj2Ac7qF67tR0d3EJNOTF_rm0OCMzICBMqb7sWsa22spk5Qmeiy65JTQUvzQ6eDVZKTrjvZtDxtIAoV-nxyZEZI9ZYFOgdV0KrdAZahhL3le4rO4S4EYkNZmW09CJnE0aJ9vf5Rm9qrFRQjPRBm-TcLcr3YP8xBKYgKS0ZZ5S70zUuFOPQaRKrEDac2E5zrr3NXdxP5kzlrmMnMYjzACH-VQlabSmCQtJtT1wyETbtRJqRiyRigT-qAuGMSMMd-f1kSAUlcV2sBpbX9na2fFXJ5SZwWecmQt0DSvYUkgZVWPqAV405PTout08SA47P0P843554BhSGmLdz4Tq_hPF-T9HzIYLJoiZk7qXlo4fLFAn_-sCaStMnInNOmALdT7zH6pxFi_L18OIUrQ-5h327WxvX32iL2E6R8PWzU8meNhVoDy8xgcWUU1ClgEkEwAzRQmgNqYeyhdbPKeZz4hNw5XcU18sl1-H5y-zBnTeuIXrCs6OryJjna-DY-UIjLGnZCQGfEA5J8QQksurhlo1nEO0evVGLyh8E5dtzZeuxwV8VgF0stNvb88gOUdf-ukggd7bI-poSF1Wz7qxmD6dfD6f6rbfW9ABYWP-_2hSRMGGIwJralKSUx_4BSKTUCZLHTj8h3brVbUtK8BwN2LyNPQ1OiRuMc2tuQj3fH_JbLiI5BfeITxzjR-2lQG-g_PF4Spil10zcMCb3tvdBFqX96wmKy8MYswzwcQ_dxwE7IwDd9MuLh5qHnvKNw3KF8zjXGCHXqfslQUqbzs4y2xAxYEAGKRZKGmUgwJ7exAYgyzp_F9CySmO5fFoUtjfPWWRpUSLc19ukrX2OkmEwWxRDoucVsBmKHHABA0VEQNpNUAaNnqNqF-5wImyqlEzNWq3rlOYb61SwCVCR_XvXBQHhAXmy8KZ749p6W64D0OyEuoqTXXWJtYJK9FNdc7355zdbYWULWiV0Q4PfOxg4A4vEg59XZScNjOnI57FL5tiFHRdb9F4mzy0CPZCTxMP3PsC3zddewC3mx-gj-2CaZsEk0jq2pSH6_u-VzKaknY-ULL0hOl09qq4KPiaUVHsMqftap2MZg9yDy5fQceHwdsfkLXaxFeZk4RrbPlxqTgW1kCvzUtfcd5SU0KeMtrrEUPlvrLUhbiG7RTwqveJ3lUYH_LJaJnz24pQYKilJuy52CeRWXEt_KkUpdA_D0IWaedpvroDGsMv0nmIY3cHcxvx7XT4moSTk2kg_fek8vlBty6G31l4M8VNhxtFkBLRs2djNotGcFzGBba_qWLVpH1DWEVCyXEIjbQqEX9LT8x2q7JOO00pfyHuQ3TTVrf3AxCR5SS4QMnSdvEgQkb6URp-iyhHtgfYhMqRfwkfSH0MbjyseacFw41-SpdIAmYgmlXM8qhRUrzHf4f9MU0OWeWGgU-07M39Q0jekShs2_uTF8iW5Tv9m-THuwx7YiAOxwYlP6qGKrdpK9LnLf3zCEQKmNW2Hz9sxFvFOSXi7ku99xfj79b952aZT2j49zto8BiYNUZoGXC_CMsuUllaVM3lEM2SPF1Z224tS9AfgI0FJq13tDdtgZIC9TdZyPo2mZf9y8C-_XjqnZtIXnIQaEZoxSAwTp8iTPp9ricJwydK3QqV16SO-u6nEWkdRQDHj-_B5_mSb6tTWVE5AKyBxhBcxVfg1HsaeHXQPxhAtEy-uQfMipsRcxj8G13uL-jy2hTspXQi0QVaMFGqV9MtHouTs0S3XxWbl5VBt4Vi8jSd-wc3JQl5AcheNgvqqmEbK2MtmqkRCOJ1aNVLtxuWaiXh5ij5tbfzKkapnQRc5h8asmD8ZdCS4-oOZaGX6qO-0EvFeiKKfEt046yqYIH1froP-xBbADAWwSeSsPGmUvwJVeZz8hB3Nf4msSVQA8xFy937tuF5ovu61OY9x0WVyMBU2F3RW6pzinnlt_3CXSDCS6n7xzfC6CY1WT98orfxFk3jgQADzJ5FkQwQOERjwrKUKkjBbjdvUc1EtYgq1OfAI15MIkrKBEVSYYWVwpjhJX021mFXnOvm0RDJy4NjTbLmt3PAN7UVEOJrQXeRkfhNrc2mO8BFCdOOh5fLPPnyy_YvbYL2uFyvRSCY9v9d43143SzIMZRpohpI8J87Tvma5flNFeaQd4pL3HSRTQL9-cz0Ue-0cPJ93DJbls3I5awq4mJArhfy_z7RmrFuvgJ20DsGE0V8Tzy-3I3t0NoF4r6hhS2txrvdFWrwAoOJamxs-mjPsPOdTXI5AfVpqLFL-ON6jepXuDYvdnnOJnUoSlJMR4xG2J6w6gZVgOA8yJEF3QT3B8KA32VfdkHDoBZ-jVNwnB7BnYCqSwAQq0fQGocg5rtlat6ABZkWwRaRAgggs56eZijTChbGqQA_iIpxtZjFOcO54-Rb3lP_J63SAQ7XKiKLRVbyEHf4QWI7W1lxaHEB8BQUMRWB3ESPCFY5Jn4FxK8oS8zve_pMtS2e722VekzGYM8urrdxC1-yDyiTbiZvBcRKz0BiHFCH51Uw9c1v1OBDAoGZCnoI3kSFMfiPmMqyEnkXZ9tvB0iUHpdYvfsyTrMjleG5Asw4nmpqQ76l4nnBFt_czTDW2MjR13nHb6XnA2x3g9qSBBktEy-LVEFQW7QbOWekpVEni1ABFp7FnnOmEUcT3wSCszoWlQV9qA4NOvzZbmMnGcoFi99n6SirQ6jOGXH-e6JIFomSl4kteA08quaPi6Hl-o5Ef_DIiMiIC5luHo4JTxCdhmWFxkuLcuny83qWtHenn-YfHf9ctXtAjmuWm8jkUb2-fDrIQlVeTG1-1xCWDcp9y6IVEC1NByc0PJQMBXpjGtLIc3QT38EMVxTtN647_15PfyuCD0k3pBDLktFyafGjINXXJ0awcR_bbviwhrV7szS9tEIVhVIYm0ET5AZxb__dU1pR53EoDAOY2j-tEub5ytL3RkR03--BmVhVJ6apUMKop1NYEqO_qudJCbqPgnGIMx0_Cnm7xDgw2f5X3RuNAF8s_eGN9hJr34ayRA25Sw92pAl-whN4tp97kxw4GuwhlcXyYlBGdshQl9xv7uUeKFNZMLjpH4rntgeDx3sRjfmBy3bnethoxbcAel6kh2ZsEyY1bYSs9g_wvtwdW0Z8gU0GBJ0Q5ymjLIDufiSF0McuqD33VedGDdfUM550-q_3-0tvtyhPV7ARXRL6m43evLjaVium8GNQr3w9LJQE3RUDXfH9OAL1fsnQNRPgP1eZnYbgiC9o9lV3MgMX27xVqbQ8a5viuVlTXj8ow9VG7R-T1zm24z5MqUntV2oXwkqkD5H5rbbk15Q9TBwF_j8eMp2xjBfWURw6qrTjgWd-PKfdMFd-F4TXr31GtM9QMX6podLuR0fqkCg4pVkKd1OXxTIvJb4snw2TBxnqfUe1RW7BiXLWKgL4R5cKSOKwCln2508uOJ1rMmI5dgSlXli8CrZn_3ym9h__GSOvmjpUeSdKwNjTivdIPyxXGsEVRiNB3LCdRwOSSkGc8uK6f8YeaIvZLeQGCFpHZNMSNdwQGRiV9ylI4bCChU6AWstPygDnsfg0r2cm6l6yeLbJ5l9xy8TButJTuVkifq9bfLBIKZYBqABzn78spKQvKI_KM.symEmalS-rzGbd8BBdkgaw";
+  authData.deviceRenderOptions = {
+    sdkUiType: [
+      "01",
+      "02",
+      "03",
+      "04"
+    ],
+    sdkInterface: "01"
+  };
+  authData.sdkEphemPubKey = {
+    kty: "EC",
+    crv: "P-256",
+    x: "bTFbB8_0RrfzygfRKZoaYePzz7K18Ehq0ed6DeOttGU",
+    y: "xLl_I7QMJD0rylQTSLtxzNQYmSwTLWh-s6RnEbPk-xc"
+  };
+  authData.sdkMaxTimeout = "60";
+  authData.sdkReferenceNumber = "3DS_LOA_SDK_MSIG_020200_00192";
+  authData.sdkTransID = uuid_gen();
+
+  function onClick() {
+
+    showSpinner();
+
+    try {
+
+      var authData = JSON.parse($('#inputArea').val());
+      console.log("authData ", authData);
+
+      if (authData.acctNumber) {
+        showCardLogo(authData.acctNumber);
+      }
+      var transType = $("input[name=dsChannelForm]:checked").val();
+      app(authData, _showData, transType);
+
+    } catch (e) {
+      console.log("error: ", e);
+      showError(e);
+    }
+
+  }
+
+  function _showData(type, data) {
+    showOutputDiv();
+    $('#outputArea').empty().text(JSON.stringify(data, undefined, 4));
+  }
+
+  function showError(error) {
+    showOutputDiv();
+    $('#outputArea').empty().text(error);
+  }
+
+  function showOutputDiv() {
+    $('#testButton').removeClass('d-none');
+    $('#processButton').addClass('d-none');
+    $('#outputDiv').removeClass('d-none');
+    $('#spinner').addClass('d-none');
+  }
+
+  function showSpinner() {
+    $('#testButton').addClass('d-none');
+    $('#processButton').removeClass('d-none');
+    $('#outputDiv').addClass('d-none');
+    $('#spinner').removeClass('d-none');
+  }
+
+  /**
+   * Temporary UUID generator. Only used for demo
+   * @returns {string}
+   */
+  function uuid_gen() {
+    function s4() {
+      return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+    }
+
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+  }
+
+  $(document).ready(function () {
+    $('#inputArea').empty().text(JSON.stringify(authData, undefined, 4));
+    showOutputDiv();
+  });
+
+</script>
+</body>
+</html>

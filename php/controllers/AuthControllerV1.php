@@ -47,6 +47,13 @@ class AuthControllerV1
         //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
         //For more details, refer to: https://docs.activeserver.cloud
         $initAuthUrl = "/api/v1/auth/brw/init/" . $messageCategory;
+
+        $transType = $_GET["trans-type"];
+
+        if (!empty($transType) && $transType == "prod") {
+            $initAuthUrl = $initAuthUrl."?trans-type=prod";
+        }
+
         //Send data to ActiveServer to Initialise authentication (Step 3)
         //Get the response data from ActiveServer (Step 4)
         $response = $this->restTemplate->post($initAuthUrl, $requestData);
@@ -98,6 +105,13 @@ class AuthControllerV1
         $requestData->threeDSRequestorTransID = Utils::_getUUId();
 
         $threeRIUrl = "/api/v1/auth/3ri/npa";
+
+        $transType = $_GET["trans-type"];
+
+        if (!empty($transType) && $transType == "prod") {
+            $threeRIUrl = $threeRIUrl."?trans-type=prod";
+        }
+
         $response = $this->restTemplate->post($threeRIUrl, $requestData);
 
         //Return data to 3ds-web-adapter (Step 13)
@@ -109,6 +123,20 @@ class AuthControllerV1
         $requestData = Utils::_getJsonData();
         $challengeStatusUrl = "/api/v1/auth/challenge/status";
         $response = $this->restTemplate->post($challengeStatusUrl, $requestData);
+        Utils::_returnJson($response->getBody()->getContents());
+    }
+
+    public function enrolCheck()
+    {
+        $requestData = Utils::_getJsonData();
+        $enrolUrl = "/api/v1/auth/enrol";
+        $transType = $_GET["trans-type"];
+
+        if (!empty($transType) && $transType == "prod") {
+            $enrolUrl = $enrolUrl."?trans-type=prod";
+        }
+
+        $response = $this->restTemplate->post($enrolUrl, $requestData);
         Utils::_returnJson($response->getBody()->getContents());
     }
 }

@@ -65,37 +65,7 @@
             <div class="tab-pane fade show active" id="basicInfo" role="tabpanel"
                  aria-labelledby="basicInfoTab">
               <div id="required-info-div">
-                <div>
-                  <h3 class="mb-3">Channel</h3>
-                  <hr>
-                  <dl class="row">
-                    <dt class="col-sm-4">Auth API URL <span class="required">*</span></dt>
-                    <dd class="col-sm-8">
-                      <input type="text" id="serverUrlToShow" class="form-control"
-                             value={{serverUrl}} disabled/>
-                    </dd>
-
-                    <dt class="col-sm-4">Requestor URL <span class="required">*</span></dt>
-                    <dd class="col-sm-8">
-                      <input type="text" id="callbackUrlToShow" class="form-control"
-                             value={{callbackUrl}} disabled/>
-                    </dd>
-
-                    <dt class="col-sm-4">Message Category <span class="required">*</span></dt>
-                    <dd class="col-sm-8">
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="messageCategoryForm"
-                               id="mess-cate-pa" value="pa" disabled>
-                        <label class="form-check-label" for="mess-cate-pa">Payment Auth</label>
-                      </div>
-                      <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="messageCategoryForm"
-                               id="mess-cate-npa" value="npa" checked disabled>
-                        <label class="form-check-label" for="mess-cate-npa">Non-payment Auth</label>
-                      </div>
-                    </dd>
-                  </dl>
-                </div>
+                {{>contents/channel}}
 
                 <div>
                   <br>
@@ -127,6 +97,20 @@
                         <option value="04">Maintain card information (04)</option>
                         <option value="05">Account verification (05)</option>
                       </select>
+                    </dd>
+
+                    <dt class="col-sm-4">Message Category <span class="required">*</span></dt>
+                    <dd class="col-sm-8">
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="messageCategoryForm"
+                               id="mess-cate-pa" value="pa" disabled>
+                        <label class="form-check-label" for="mess-cate-pa">Payment Auth</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="messageCategoryForm"
+                               id="mess-cate-npa" value="npa" checked disabled>
+                        <label class="form-check-label" for="mess-cate-npa">Non-payment Auth</label>
+                      </div>
                     </dd>
 
                   </dl>
@@ -222,10 +206,7 @@
   }
 
   function goApiV1() {
-    var sessionData = {};
-    sessionData.channel = "3ri";
-    sessionData.authData = genAuthData();
-    sessionData.backButtonType = "to3ri";
+    var sessionData = genSessionData();
 
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 
@@ -233,15 +214,21 @@
   }
 
   function goApiV2() {
-    var sessionData = {};
-    sessionData.channel = "3ri";
-    sessionData.authData = genAuthData();
+    var sessionData = genSessionData();
     sessionData.authData.messageCategory = "npa";
-    sessionData.backButtonType = "to3ri";
 
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 
     window.location.href = "/v2/process";
+  }
+
+  function genSessionData() {
+    var sessionData = {};
+    sessionData.channel = "3ri";
+    sessionData.authData = genAuthData();
+    sessionData.backButtonType = "to3ri";
+    sessionData.transType = $("input[name=dsChannelForm]:checked").val();
+    return sessionData;
   }
 
   function genAuthData() {

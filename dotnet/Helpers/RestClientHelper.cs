@@ -71,30 +71,22 @@ namespace GPayments.Requestor.TestLab.Helpers
 
         public static object PostForObject(string url, object request, Type responseType)
         {
-            try
-            {
-                HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
-                req.Method = "POST";
-                req.ClientCertificates.Add(GetClientCertificate());
-                //the certificate is for groupAuth, work out the header
-                if (Config.GroupAuth)
-                    req.Headers.Add("AS-Merchant-Token", Config.MerchantToken);
-                req.ContentType = "application/json;charset=utf-8";
-                string strRequest = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
-                byte[] postData = System.Text.Encoding.UTF8.GetBytes(strRequest);
-                req.ContentLength = postData.Length;
-                using (Stream streamOut = req.GetRequestStream())
-                    streamOut.Write(postData, 0, postData.Length);
-                string result = null;
-                using (StreamReader streamIn = new StreamReader(req.GetResponse().GetResponseStream()))
-                    result = streamIn.ReadToEnd();
-                return JsonConvert.DeserializeObject(result, responseType);
-            }
-            catch (Exception exp)
-            {
-                logger.Error(exp.Message, exp);
-                throw exp;
-            }
+            HttpWebRequest req = (HttpWebRequest)HttpWebRequest.Create(url);
+            req.Method = "POST";
+            req.ClientCertificates.Add(GetClientCertificate());
+            //the certificate is for groupAuth, work out the header
+            if (Config.GroupAuth)
+                req.Headers.Add("AS-Merchant-Token", Config.MerchantToken);
+            req.ContentType = "application/json;charset=utf-8";
+            string strRequest = JsonConvert.SerializeObject(request, Formatting.Indented, new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore });
+            byte[] postData = System.Text.Encoding.UTF8.GetBytes(strRequest);
+            req.ContentLength = postData.Length;
+            using (Stream streamOut = req.GetRequestStream())
+                streamOut.Write(postData, 0, postData.Length);
+            string result = null;
+            using (StreamReader streamIn = new StreamReader(req.GetResponse().GetResponseStream()))
+                result = streamIn.ReadToEnd();
+            return JsonConvert.DeserializeObject(result, responseType);
         }
 
         public static object GetForObject(string url, Type responseType)
