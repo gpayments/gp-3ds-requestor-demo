@@ -24,14 +24,19 @@ namespace GPayments.Requestor.TestLab.Helpers
 {
     public class RestClientHelper
     {
-        private static string CERTIFICATE_PASSWORD = "123456";
+        private const string DEFAULT_CERT_FILE_PASSWORD = "123456";
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(RestClientHelper));
         private static X509Certificate2 caCert = null;
+
+        private static string keyStorePassword
+        {
+            get { return !string.IsNullOrEmpty(Config.CertFilePassword) ? Config.CertFilePassword : DEFAULT_CERT_FILE_PASSWORD; }
+        }
 
         static RestClientHelper()
         {
             string certsPath = System.Web.Hosting.HostingEnvironment.MapPath("~/Certs");
-            caCert = new X509Certificate2(string.Format(@"{0}\{1}", certsPath, "cacerts.pem"), CERTIFICATE_PASSWORD);
+            caCert = new X509Certificate2(string.Format(@"{0}\{1}", certsPath, "cacerts.pem"), keyStorePassword);
 
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             ServicePointManager.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) =>
@@ -63,7 +68,7 @@ namespace GPayments.Requestor.TestLab.Helpers
             string clientCertPath = Config.CertFileName.TrimStart(new char[] { '/', '\\' });
             if (!Path.IsPathRooted(clientCertPath))
                 clientCertPath = System.Web.Hosting.HostingEnvironment.MapPath("~") + clientCertPath;
-            X509Certificate2 clientCert = new X509Certificate2(clientCertPath, CERTIFICATE_PASSWORD, X509KeyStorageFlags.DefaultKeySet);
+            X509Certificate2 clientCert = new X509Certificate2(clientCertPath, keyStorePassword, X509KeyStorageFlags.DefaultKeySet);
             if (!clientCert.HasPrivateKey)
                 throw new Exception("Certificate has no private key.");
             return clientCert;

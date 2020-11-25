@@ -28,7 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 /**
  * @author GPayments ON 31/07/2018 MainConroller class with handler methods.
@@ -37,14 +37,12 @@ import org.springframework.web.client.RestTemplate;
 @RequestMapping("/")
 public class MainController {
 
-  private static final Logger logger = LoggerFactory.getLogger(AuthControllerV1.class);
+  private static final Logger logger = LoggerFactory.getLogger(MainController.class);
   private final Config config;
-  private final RestTemplate restTemplate;
 
   @Autowired
-  public MainController(Config config, RestTemplate restTemplate) {
+  public MainController(Config config) {
     this.config = config;
-    this.restTemplate = restTemplate;
   }
 
   @RequestMapping
@@ -153,4 +151,39 @@ public class MainController {
     return "notify_3ds_events";
   }
 
+  @GetMapping("/noscript")
+  public String noScript() {
+    return "no_script";
+  }
+
+
+  @PostMapping("/3ds-notify/noscript")
+  public String notify(
+      @RequestParam("requestorTransId") String transId,
+      @RequestParam("event") String callbackType,
+      @RequestParam("param") String param,
+      RedirectAttributes ra) {
+
+    if ("3DSMethodFinished".equals(callbackType)
+        || "3DSMethodSkipped".equals(callbackType)
+        || "InitAuthTimedOut".equals(callbackType)) {
+
+      logger.info("{}, continue to do authentication", callbackType);
+
+      ra.addAttribute("transId", transId);
+      ra.addAttribute("param", param);
+      return "redirect:/v2/auth/noscript";
+
+    } else if ("AuthResultReady".equals(callbackType)) {
+
+      logger.info("{}, continue to get result", callbackType);
+
+      ra.addAttribute("transId", transId);
+      return "redirect:/v2/auth/brw/result/noscript";
+
+    } else {
+      throw new IllegalArgumentException("invalid notifyCallback");
+    }
+
+  }
 }

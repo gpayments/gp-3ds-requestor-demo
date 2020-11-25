@@ -104,6 +104,34 @@
   height: 680px;
 }
 
+.spinnerContainer {
+  overflow: hidden;
+  height: 680px;
+}
+
+.checkoutCard {
+  padding-top: 24px;
+  position: relative;
+  height: 1000px;
+}
+
+.iframeContainer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 785px;
+  height: 678px;
+  box-sizing: content-box;
+}
+
+.spinnerContainer {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 785px;
+  height: 678px;
+}
+
 #cover {
   margin: 0;
   padding: 1.5rem;
@@ -148,4 +176,52 @@
 .highlight {
   background-color: #f7f7f9;
   padding: 1.5rem 0.75rem;;
+}
+
+.spinner .decoupled-info-tag {
+  margin: 20px 80px;
+}
+
+.noScriptContainer {
+  border: 1px #e8e8e8 solid;
+  background: #ffffff;
+  margin: 20px auto;
+  padding: 14px;
+  max-width: 600px;
+  max-height: 600px;
+}
+
+.noScriptContainer p {
+  margin-top: 10px;
+}
+
+.noScriptContainer label {
+  padding-left: 20px;
+  margin: 3px 0;
+}
+
+.noScriptContainer input {
+  margin: 3px 0;
+}
+
+.noScriptContainer button {
+  margin: 15px 0 0 0;
+  width: 70px;
+}
+
+
+.noScriptContainer button:focus {
+  background: grey;
+  color: #fff;
+}
+
+.noscriptIframeContainer {
+  height: 800px;
+}
+
+pre {
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
 }

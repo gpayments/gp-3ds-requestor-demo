@@ -293,7 +293,7 @@
 
     authData.merchantId = "123456789012345";
     authData.authenticationInd = "01";
-    authData.purchaseDate = moment().format('YYYYMMDDhhmmss');
+    authData.purchaseDate = moment().utc().format('YYYYMMDDHHmmss');
     authData.purchaseAmount = getTotalPrice(itemList) * 100; //cent to dollar
 
     var acctNumber = $('#acctNumber').val();

@@ -48,7 +48,9 @@
   if (sessionData.authData.acctNumber) {
     showCardLogo(sessionData.authData.acctNumber);
   }
-  updateBackButton(sessionData.backButtonType);
+  var backButton = $('#backButton');
+  //don't show the back button
+  backButton.addClass("d-none");
 
   /**
    * All 3ds2 requests handled in process.html page.
@@ -115,7 +117,8 @@
 
       case "onChallengeStart":
         //remove the spinner to show the challenge window
-        $(".spinner").remove();
+        $("#spinner").remove();
+        $("#iframeDiv").removeClass("d-none");
         break;
 
       case "onError":
@@ -141,6 +144,10 @@
   }
 
   function showData(data) {
+    //show the back button
+    updateBackButton(sessionData.backButtonType);
+    backButton.removeClass("d-none");
+
     if (data.transStatusReason) {
       data.transStatusReason = formatTransStatusReason(data.transStatusReason);
     }

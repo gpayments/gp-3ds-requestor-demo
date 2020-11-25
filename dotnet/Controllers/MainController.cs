@@ -26,6 +26,7 @@ namespace GPayments.Requestor.TestLab.Controllers
     public class MainController : Controller
     {
         private static readonly log4net.ILog logger = log4net.LogManager.GetLogger(typeof(MainController));
+        private AuthServiceV2 authServiceV2 = new AuthServiceV2();
 
         public ActionResult Index()
         {
@@ -129,6 +130,82 @@ namespace GPayments.Requestor.TestLab.Controllers
             model.callbackParam = param;
 
             return View("notify_3ds_events", model);
+        }
+
+        [HttpGet, Route("noscript")]
+        public ActionResult NoScript()
+        {
+            return View("no_script");
+        }
+
+        /**
+        * Receives the initialise authentication request from a no-javascript environment.
+        */
+        [HttpPost, Route("v2/auth/init/noscript")]
+        public ActionResult initAuthNoScript([System.Web.Http.FromBody] AuthDataNoScriptDTO authData, [System.Web.Http.FromUri(Name = "trans-type")] string transType = null)
+        {
+            Model model = new Model();
+            string view = authServiceV2.initAuthNoScript(transType, authData, model);
+            return View(view, model);
+        }
+
+        [HttpGet, Route("v2/auth/noscript")]
+        public ActionResult authNoScript(String transId, String param)
+        {
+            Model model = new Model();
+            string view = authServiceV2.authNoScript(transId, param, model);
+            if (view.StartsWith("redirect:"))//handle redirect url
+                return new RedirectResult(view.Substring(9).Trim());
+            return View(view, model);
+        }
+
+        [HttpGet, Route("v2/auth/result/noscript/poll")]
+        public ActionResult pollResultNoScript(String transId)
+        {
+            Model model = new Model();
+            string view = authServiceV2.pollResultNoScript(transId, model);
+            if (view.StartsWith("redirect:"))//handle redirect url
+                return new RedirectResult(view.Substring(9).Trim());
+            return View(view, model);
+        }
+
+        [HttpGet, Route("v2/auth/brw/result/noscript")]
+        public ActionResult resultNoScript(String transId)
+        {
+            Model model = new Model();
+            string view = authServiceV2.resultNoScript(transId, model);
+            return View(view, model);
+        }
+
+        [HttpPost, Route("3ds-notify/noscript")]
+        public ActionResult NotifyNoScript()
+        {
+            string transId = Request.Params["requestorTransId"];
+            string callbackType = Request.Params["event"];
+            string param = Request.Params["param"];
+
+            if ("3DSMethodFinished".Equals(callbackType)
+                || "3DSMethodSkipped".Equals(callbackType)
+                || "InitAuthTimedOut".Equals(callbackType))
+            {
+                logger.Info(string.Format("{0}, continue to do authentication", callbackType));
+
+                //redirect:/v2/auth/noscript
+                return RedirectToAction("v2/auth/noscript", new { transId, param });
+
+            }
+            else if ("AuthResultReady".Equals(callbackType))
+            {
+
+                logger.Info(string.Format("{0}, continue to get result", callbackType));
+
+                //redirect:/v2/auth/brw/result/noscript
+                return RedirectToAction("v2/auth/brw/result/noscript", new { transId });
+            }
+            else
+            {
+                throw new ArgumentException("invalid notifyCallback");
+            }
         }
     }
 }

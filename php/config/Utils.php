@@ -1,4 +1,5 @@
-<?php
+<?php session_start();
+
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -16,7 +17,6 @@
  *
  *
  */
-
 class Utils
 {
     public static function _getJsonData()
@@ -48,11 +48,25 @@ class Utils
         );
     }
 
-    public static function _returnJson($response)
+    public static function _returnJson($response, $statusCode = 200)
     {
-        header('Content-Type: application/json;charset=utf-8');
+        header('Content-Type: application/json;charset=utf-8', true, $statusCode);
         echo $response;
         exit;
+    }
+
+    /**
+     * Redirects to the given URL
+     * @param $url string be a path all whole domain
+     * @param bool $permanent true if 301 permanent redirection, default false.
+     */
+    public static function _redirect($url, $permanent = false)
+    {
+//        echo "redirecting to ".'Location: ' . $url;
+
+        header('Location: ' . $url, true, $permanent ? 301 : 302);
+
+        exit();
     }
 
 }

@@ -30,6 +30,7 @@ public class Config {
   private String asAuthUrl;
   private String baseUrl;
   private String certFileName;
+  private String certFilePassword;
   private boolean groupAuth;
   private String merchantToken;
   private String transType;
@@ -56,6 +57,14 @@ public class Config {
 
   public void setCertFileName(String certFileName) {
     this.certFileName = certFileName;
+  }
+
+  public String getCertFilePassword() {
+    return certFilePassword;
+  }
+
+  public void setCertFilePassword(String certFilePassword) {
+    this.certFilePassword = certFilePassword;
   }
 
   public boolean isGroupAuth() {

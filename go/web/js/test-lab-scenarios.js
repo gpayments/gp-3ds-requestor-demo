@@ -43,13 +43,6 @@ var cards = [
         expiryDate: 2508
       },
       {
-        name: "notEnrol",
-        description: "Card not enrolled",
-        label: "Card not enrolled",
-        cardNumber: 4100000000200007,
-        expiryDate: 2508
-      },
-      {
         name: "fail",
         description: "Authentication failed",
         label: "Auth failed",
@@ -95,13 +88,6 @@ var cards = [
         description: "Authentication attempt",
         label: "Auth attempt",
         cardNumber: 5100000000100006,
-        expiryDate: 2508
-      },
-      {
-        name: "notEnrol",
-        description: "Card not enrolled",
-        label: "Card not enrolled",
-        cardNumber: 5100000000200004,
         expiryDate: 2508
       },
       {
@@ -153,13 +139,6 @@ var cards = [
         expiryDate: 2508
       },
       {
-        name: "notEnrol",
-        description: "Card not enrolled",
-        label: "Card not enrolled",
-        cardNumber: 3528000000200003,
-        expiryDate: 2508
-      },
-      {
         name: "fail",
         description: "Authentication failed",
         label: "Auth failed",
@@ -208,13 +187,6 @@ var cards = [
         expiryDate: 2508
       },
       {
-        name: "notEnrol",
-        description: "Card not enrolled",
-        label: "Card not enrolled",
-        cardNumber: 340000000200005,
-        expiryDate: 2508
-      },
-      {
         name: "fail",
         description: "Authentication failed",
         label: "Auth failed",
@@ -260,13 +232,6 @@ var cards = [
         description: "Authentication attempt",
         label: "Auth attempt",
         cardNumber: 6440000000100003,
-        expiryDate: 2508
-      },
-      {
-        name: "notEnrol",
-        description: "Card not enrolled",
-        label: "Card not enrolled",
-        cardNumber: 6440000000200001,
         expiryDate: 2508
       },
       {

@@ -386,6 +386,7 @@ function updateBackButton(type) {
  */
 function showCardLogo(cardNumber) {
   var cardLogo = $("#cardLogo");
+  cardLogo.removeClass('d-none');
   switch (cc_brand_id(cardNumber)) {
     case "Visa":
       cardLogo.attr("src", "/images/visa-logo.png");

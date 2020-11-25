@@ -1,4 +1,4 @@
-<?php
+<?php session_start();
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the

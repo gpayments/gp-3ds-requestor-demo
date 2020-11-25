@@ -8,6 +8,17 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.0 (compatible with ActiveServer v2.0.0)
+* Addded support for **EMV message version 2.2.0**
+	* Added a Message Version selection field on the test pages to select between EMV v2.1.0 and v2.2.0
+	* Added additional message fields for EMV v2.2.0 transactions on the test pages
+	* Added support in the 3ds-web-adapter for the decoupled authentication flow
+* Added demo code to support a no java-script environment
+* Added a Challenge Window Size dropdown box on the BRW test page to specify the challenge window size
+* Change the _onInitAuthTimedOut function to handle the 3ds method timeout scenario
+* Change the purchaseDate field to be UTC time
+* Added a configuration for the certificate file password
+
 ### Version 1.5 (compatible with ActiveServer v1.4.0)
 * Added a **Directory Server** selection field on the test pages to allow sending the transaction to either the Testlab or Production directory server
 * Added an **App test page** with mock authentication data for APP channel testing

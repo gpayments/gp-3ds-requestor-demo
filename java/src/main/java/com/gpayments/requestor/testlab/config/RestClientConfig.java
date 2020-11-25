@@ -39,13 +39,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class RestClientConfig {
 
-  private static final String KEYSTORE_PASSWORD = "123456";
-  private static final String KEY_ENTRY_PASSWORD = "123456";
+  private static final String DEFAULT_CERT_FILE_PASSWORD = "123456";
   private static final String CA_CERTS_FILE_NAME = "certs/cacerts.pem";
 
   @Bean
@@ -53,12 +53,14 @@ public class RestClientConfig {
       throws IOException, UnrecoverableKeyException, CertificateException, NoSuchAlgorithmException,
       KeyStoreException, KeyManagementException {
 
+    final String keyStorePassword =
+        !StringUtils.isEmpty(config.getCertFilePassword()) ? config.getCertFilePassword()
+            : DEFAULT_CERT_FILE_PASSWORD;
+    final char[] chars = keyStorePassword.toCharArray();
     SSLContext sslContext =
         SSLContextBuilder.create()
             .loadKeyMaterial(
-                new File(config.getCertFileName()),
-                KEYSTORE_PASSWORD.toCharArray(),
-                KEY_ENTRY_PASSWORD.toCharArray())
+                new File(config.getCertFileName()), chars, chars)
             .loadTrustMaterial(getCAKeystore(CA_CERTS_FILE_NAME), new TrustSelfSignedStrategy())
             .build();
 

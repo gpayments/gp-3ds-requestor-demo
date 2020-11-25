@@ -168,14 +168,14 @@ function _onInitAuthSuccess(data) {
 
     serverTransId = data.threeDSServerTransID;
     $('<iframe id="' + "3ds_" + iframeId
-        + '" width="0" height="0" style="visibility: hidden;" src="'
+        + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
         + data.threeDSServerCallbackUrl + '"></iframe>')
     .appendTo(iframeContainer);
 
     if (data.monUrl) {
       // optionally append the monitoring iframe
       $('<iframe id="' + "mon_" + iframeId
-          + '" width="0" height="0" style="visibility: hidden;" src="'
+          + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
           + data.monUrl + '"></iframe>')
       .appendTo(iframeContainer);
     }
@@ -342,9 +342,8 @@ function _on3DSMethodFinished(transId) {
 function _onInitAuthTimedOut(transId) {
   console.log('Init Auth has timed out due to 3DS method timing out or browser '
       + 'information collecting failed'
-      + ' now terminating the authentication process. transId=', transId);
-
-  _onError({"Error": "InitAuth timeout"});
+      + ' now continue the authentication. transId=', transId);
+  _doAuth(transId);
 }
 
 /**

@@ -22,12 +22,16 @@ class AuthControllerV2
 
     private $restTemplate;
     private $config;
+    private $authService;
+    private $templateResolver;
 
 
-    function __construct(Config $config, RestClientConfig $restTemplate)
+    function __construct(Config $config, RestClientConfig $restTemplate, TemplateResolver $templateResolver)
     {
         $this->config = $config;
         $this->restTemplate = $restTemplate;
+        $this->authService = new AuthServiceV2($config, $restTemplate, $templateResolver);
+        $this->templateResolver = $templateResolver;
     }
 
     /**
@@ -44,23 +48,10 @@ class AuthControllerV2
 
         $transType = $_GET["trans-type"];
 
-        //ActiveServer url for Initialise Authentication
-        //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
-        //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
-        //For more details, refer to: https://docs.activeserver.cloud
-        $initAuthUrl = "/api/v2/auth/brw/init";
+        $responseBody = $this->authService->sendInitAuthRequest($transType, $requestData);
 
-        if (!empty($transType) && $transType == "prod") {
-            $initAuthUrl = $initAuthUrl."?trans-type=prod";
-        }
-
-        //Send data to ActiveServer to Initialise authentication (Step 3)
-        //Get the response data from ActiveServer (Step 4)
-        $response = $this->restTemplate->post($initAuthUrl, $requestData);
-        $responseBody = json_decode($response->getBody());
-        $_SESSION[$responseBody->threeDSServerTransID] = $responseBody;
         //Return data to 3ds-web-adapter (Step 5)
-        Utils::_returnJson($response->getBody());
+        Utils::_returnJson($responseBody);
     }
 
     /**
@@ -70,33 +61,29 @@ class AuthControllerV2
     public function auth()
     {
         $requestData = Utils::_getJsonData();
-        //ActiveServer url for Execute Authentication
-        $authUrl = $_SESSION[$requestData->threeDSServerTransID]->authUrl;
 
         //Send data to ActiveServer to Execute Authentication (Step 10)
         //Get the response data from ActiveServer (Step 12)
-        $response = $this->restTemplate->post($authUrl, $requestData);
+        $response = $this->authService->sendAuthRequest($requestData);
 
         //Return data to 3ds-web-adapter (Step 13)
-        Utils::_returnJson($response->getBody()->getContents());
+        Utils::_returnJson($response);
     }
 
     /**
-     * Receives the Request for authentication result request (Step 15(F) and Step 20(C))
+     * Receives the Request for authentication result request (Step. 15(F), Step. 26(C) or Step. 19(D))
      * Send data to ActiveServer to Retrieve Authentication Results
      */
-    public function result()
+    public function brwResult()
     {
         $serverTransId = $_GET["txid"];
-        //ActiveServer url for Retrieve Results
-        $resultUrl = "/api/v2/auth/brw/result?threeDSServerTransID=" . $serverTransId;
 
-        //Get authentication result from ActiveServer (Step 16(F) and Step 21(C))
-        $response = $this->restTemplate->get($resultUrl);
+        $response = $this->authService->getBrwResult($serverTransId);
 
-        //Show authentication results on result.html (Step 17(F) and Step 22(C))
-        Utils::_returnJson($response->getBody()->getContents());
+        //Show authentication results on result.html (Step. 17(F), Step. 28(C) or Step. 21(D), 22(D)).
+        Utils::_returnJson($response);
     }
+
 
     public function threeRI()
     {
@@ -109,7 +96,7 @@ class AuthControllerV2
         $transType = $_GET["trans-type"];
 
         if (!empty($transType) && $transType == "prod") {
-            $threeRIUrl = $threeRIUrl."?trans-type=prod";
+            $threeRIUrl = $threeRIUrl . "?trans-type=prod";
         }
 
         $response = $this->restTemplate->post($threeRIUrl, $requestData);
@@ -117,6 +104,15 @@ class AuthControllerV2
         //Return data to 3ds-web-adapter (Step 13)
         Utils::_returnJson($response->getBody()->getContents());
     }
+
+    public function threeRIResult()
+    {
+        $serverTransId = $_GET["txid"];
+        $result = $this->authService->getThreeRIResult($serverTransId);
+        //Show authentication results on result.html (Step 17(F) and Step 22(C))
+        Utils::_returnJson($result);
+    }
+
 
     public function challengeStatus()
     {
@@ -135,7 +131,7 @@ class AuthControllerV2
         $transType = $_GET["trans-type"];
 
         if (!empty($transType) && $transType == "prod") {
-            $authAppUrl = $authAppUrl."?trans-type=prod";
+            $authAppUrl = $authAppUrl . "?trans-type=prod";
         }
 
         $response = $this->restTemplate->post($authAppUrl, $requestData);
@@ -149,12 +145,60 @@ class AuthControllerV2
         $transType = $_GET["trans-type"];
 
         if (!empty($transType) && $transType == "prod") {
-            $enrolUrl = $enrolUrl."?trans-type=prod";
+            $enrolUrl = $enrolUrl . "?trans-type=prod";
         }
 
         $response = $this->restTemplate->post($enrolUrl, $requestData);
         Utils::_returnJson($response->getBody()->getContents());
     }
 
+    public function initAuthNoScript()
+    {
+        $initAuthNoScript = new stdClass();
+        $initAuthNoScript->acctNumber = $_POST["acctNumber"];
+        $initAuthNoScript->merchantId = $_POST["merchantId"];
+        $initAuthNoScript->transType = $_POST["transType"];
+        $initAuthNoScript->messageVersion = $_POST["messageVersion"];
+        $initAuthNoScript->authenticationInd = $_POST["authenticationInd"];
+        $initAuthNoScript->purchaseAmount = $_POST["purchaseAmount"];
+        $initAuthNoScript->purchaseCurrency = $_POST["purchaseCurrency"];
+        $initAuthNoScript->messageCategory = $_POST["messageCategory"];
+        $initAuthNoScript->purchaseDate = $_POST["purchaseDate"];
+        $initAuthNoScript->threeDSRequestorDecReqInd = $_POST["threeDSRequestorDecReqInd"];
+        $initAuthNoScript->threeDSRequestorDecMaxTime = $_POST["threeDSRequestorDecMaxTime"];
+
+        $transType = $_POST["trans-type"];
+        $this->authService->initAuthNoScript($transType, $initAuthNoScript);
+    }
+
+    public function authNoScript()
+    {
+        $this->authService->authNoScript($_GET["transId"], $_GET["param"]);
+    }
+
+    public function resultNoScript()
+    {
+        $transId = $_GET["transId"];;
+
+        AuthServiceV2::verifySessionTransId($transId);
+
+        $threeDSServerTransID = $_SESSION[SessionKeys::INIT_AUTH_RESPONSE]->threeDSServerTransID;
+
+        $response = $this->authService->getBrwResult($threeDSServerTransID);
+
+        $model = array();
+        $model["result"] = json_encode(json_decode($response), JSON_PRETTY_PRINT);
+
+        $this->templateResolver->_render("no_script_results", $model);
+    }
+
+    public function pollResult()
+    {
+        $transId = $_GET["transId"];;
+
+        AuthServiceV2::verifySessionTransId($transId);
+
+        $this->authService->pollRequestNoScript($transId);
+    }
 
 }

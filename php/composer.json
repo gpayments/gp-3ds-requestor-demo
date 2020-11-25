@@ -2,6 +2,7 @@
   "require": {
     "guzzlehttp/guzzle": "~6.0",
     "mustache/mustache": "~2.5",
-    "ext-json": "*"
+    "ext-json": "*",
+    "monolog/monolog": "^2.1"
   }
 }

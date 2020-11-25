@@ -29,7 +29,7 @@ import (
 )
 
 const (
-	keystorePassword = "123456"
+	defaultKeystorePassword = "123456"
 )
 
 func createHttpClient(config *Config) (*http.Client, error) {
@@ -48,7 +48,11 @@ func createHttpClient(config *Config) (*http.Client, error) {
 	}
 
 	// Load the client certificate
-	privateKey, clientCert, _, err := pkcs122.DecodeChain(p12, keystorePassword)
+	certPassword := config.GPayments.CertFilePassword
+	if certPassword == "" {
+		certPassword = defaultKeystorePassword
+	}
+	privateKey, clientCert, _, err := pkcs122.DecodeChain(p12, certPassword)
 
 	if err != nil {
 		return nil, err

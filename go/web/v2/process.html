@@ -48,7 +48,14 @@
   if (sessionData.authData.acctNumber) {
     showCardLogo(sessionData.authData.acctNumber);
   }
-  updateBackButton(sessionData.backButtonType);
+
+  if (sessionData.options && sessionData.options.challengeWindowSize) {
+    setChallengeWindowSize(sessionData.options.challengeWindowSize);
+  }
+
+  var backButton = $('#backButton');
+  //don't show the back button
+  backButton.addClass("d-none");
 
   /**
    * All 3ds2 requests handled in process.html page.
@@ -58,7 +65,7 @@
     case "brw":
       var container = $('#iframeDiv');
 
-      //call 'brw()' function in 3ds-web-adapter to perform Browser-based authentication (Step 1)
+      //call 'brw()' function in 3ds-web-adapter to perform Browser-based authentication
       //parameters:
       //   authData: data for authentication
       //   container: container object for iframe used in 3ds-web-adapter.
@@ -91,7 +98,9 @@
    * @param type. Indicate the type of event. Values accepted:
    *                    onAuthResult: indicate an auth result
    *                    on3RIResult: indicate an 3ri result
+   *                    onEnrolResult: indicate an enrol result
    *                    onChallengeStart: indicate to start a challenge
+   *                    onDecoupledAuthStart: indicate to start a decoupled authentication
    *                    onError: indicate an error
    * @param data. The data returned from 3ds-web-adapter. Data contains either the result of 'auth', '3ri', or the error message.
    */
@@ -114,7 +123,13 @@
 
       case "onChallengeStart":
         //remove the spinner to show the challenge window
-        $(".spinner").remove();
+        $("#spinner").remove();
+        $("#iframeDiv").removeClass("d-none");
+        break;
+
+      case "onDecoupledAuthStart":
+        $("#decoupledLabelTag").removeClass("d-none");
+        showDecoupleInfo(data);
         break;
 
       case "onError":
@@ -140,6 +155,10 @@
   }
 
   function showData(data) {
+    //show the back button
+    updateBackButton(sessionData.backButtonType);
+    backButton.removeClass("d-none");
+
     if (data.transStatusReason) {
       data.transStatusReason = formatTransStatusReason(data.transStatusReason);
     }
@@ -155,8 +174,20 @@
     $("#resultCard").removeClass("d-none");
   }
 
+  function showDecoupleInfo(data) {
+
+    if (data && data.cardholderInfo) {
+      $("#decoupledInfoTag").removeClass("d-none");
+      var toShow = "<dt class='col-sm-4'>cardholderInfo</dt>" + "<dd class='col-sm-8'>"
+          + data.cardholderInfo
+          + "</dd>"
+      $('#decoupledInfoData').html(toShow);
+    }
+
+  }
+
   /**
-   * call url /result to get result  (Step 15(F) or Step 20(C))
+   * call url /result to get result
    */
   function openResultInNewWindow() {
     if (serverTransId) {
@@ -166,6 +197,30 @@
       window.open(url, 'newwindow', 'height=800,width=1000');
     }
   }
+
+  function setChallengeWindowSize(challengeWindowSize) {
+    var iframeDiv = $('#iframeDiv');
+    switch (challengeWindowSize) {
+      case "01":
+        iframeDiv.css({"width": "250px", "height": "400px"});
+        break;
+      case "02":
+        iframeDiv.css({"width": "390px", "height": "400px"});
+        break;
+      case "03":
+        iframeDiv.css({"width": "500px", "height": "600px"});
+        break;
+      case "04":
+        iframeDiv.css({"width": "600px", "height": "400px"});
+        break;
+      case "05":
+        iframeDiv.css({"width": "100%", "height": "100%"});
+        break;
+      default:
+        console.log("Invalid challengeWindowSize.")
+    }
+  }
+
 </script>
 </body>
 </html>

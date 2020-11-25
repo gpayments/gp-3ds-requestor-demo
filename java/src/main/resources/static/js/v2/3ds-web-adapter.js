@@ -88,10 +88,13 @@ function brw(authData, container, callbackFn, options, transType) {
   var initAuthData = {};
   initAuthData.acctNumber = authData.acctNumber;
   initAuthData.merchantId = authData.merchantId;
+  if (options && options.challengeWindowSize) {
+    initAuthData.challengeWindowSize = options.challengeWindowSize;
+  }
 
   console.log('init authentication', initAuthData);
 
-  //Send data to /auth/init to do Initialise authentication (Step 2)
+  //Send data to /auth/init to do Initialise authentication
   doPost(initAuthUrl, initAuthData, _onInitAuthSuccess, _onError);
 }
 
@@ -146,15 +149,6 @@ function enrol(authData, callbackFn, transType) {
 }
 
 /**
- * Get the authentication from Active Server
- * @param threeDSServerTransID
- * @param callbackFn
- */
-function result(threeDSServerTransID, callbackFn) {
-  getResult(threeDSServerTransID, callbackFn);
-}
-
-/**
  * Post authData to 3ds requestor with url
  * @param url
  * @param authData
@@ -178,6 +172,52 @@ function doPost(url, authData, onSuccess, onError) {
 }
 
 /**
+ * Start doing the decouple authentication
+ * @Param data: data returned form auth url
+ * @Param authReadyCallback: callback function when get the AuthResultReady event
+ */
+function _startDecoupledAuth(data, authReadyCallback) {
+  if (data.resultMonUrl) {
+    _callbackFn("onDecoupledAuthStart", data);
+    _doPolling(data.resultMonUrl, authReadyCallback)
+  } else {
+    _onError({"Error": "Invalid Result Mon Url"});
+  }
+}
+
+/**
+ * Start polling result
+ * @Param url: polling url
+ * @Param authReadyFn: callback function when get the AuthResultReady event
+ */
+function _doPolling(url, authReadyCallback) {
+  console.log("call mon url: ", url);
+  $.get(url)
+  .done(function (data) {
+    console.log('returns:', data);
+
+    if (!data.event) {
+      _onError({"Error": "Invalid mon url result"});
+    }
+
+    if (data.event === "AuthResultNotReady") {
+      console.log("AuthResultNotReady, call it again after 1 second");
+      setTimeout(function () {
+        _doPolling(url, authReadyCallback)
+      }, 1000);
+    } else if (data.event === "AuthResultReady") {
+      console.log('AuthResultReady');
+      authReadyCallback(serverTransId, _callbackFn);
+    } else {
+      _onError({"Error": "Invalid mon url result event type"});
+    }
+  })
+  .fail(function (error) {
+    callbackFn("onError", error.responseJSON);
+  });
+}
+
+/**
  * callback function for brw
  * @param data
  * @private
@@ -189,14 +229,14 @@ function _onInitAuthSuccess(data) {
 
     serverTransId = data.threeDSServerTransID;
     $('<iframe id="' + "3ds_" + iframeId
-        + '" width="0" height="0" style="visibility: hidden;" src="'
+        + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
         + data.threeDSServerCallbackUrl + '"></iframe>')
     .appendTo(iframeContainer);
 
     if (data.monUrl) {
       // optionally append the monitoring iframe
       $('<iframe id="' + "mon_" + iframeId
-          + '" width="0" height="0" style="visibility: hidden;" src="'
+          + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
           + data.monUrl + '"></iframe>')
       .appendTo(iframeContainer);
     }
@@ -207,7 +247,7 @@ function _onInitAuthSuccess(data) {
 }
 
 /**
- * Send data to url /auth to Execute authentication (Step 9)
+ * Send data to url /auth to Execute authentication
  * @param transId
  * @private
  */
@@ -221,7 +261,7 @@ function _doAuth(transId, param) {
   var authData = _authData;
   //set the returned param to browserInfo
   authData.browserInfo = param;
-  // authData.threeDSRequestorTransID = transId;
+  authData.threeDSRequestorTransID = transId;
   authData.threeDSServerTransID = serverTransId;
   console.log("authData: ", authData);
   doPost("/v2/auth", authData, _onDoAuthSuccess, _onError);
@@ -254,6 +294,8 @@ function _onDoAuthSuccess(data) {
             {"Error": "Invalid Challenge Callback Url"});
       }
 
+    } else if (data.transStatus === "D") {
+      _startDecoupledAuth(data, getBrwResult);
     } else {
       _callbackFn("onAuthResult", data);
     }
@@ -263,7 +305,7 @@ function _onDoAuthSuccess(data) {
 }
 
 /**
- * Setup iframe for challenge flow (Step 14(C))
+ * Setup iframe for challenge flow
  * @param url is the challenge url returned from 3DS Server
  */
 function startChallenge(url) {
@@ -314,22 +356,39 @@ function _cancelMessage() {
  **/
 function _onAuthResult() {
   console.log('authentication result is ready: ');
-  getResult(serverTransId, _callbackFn);
+  getBrwResult(serverTransId, _callbackFn);
 }
 
 /**
- * Method to get authentication result
+ * Method to get brw authentication result
  * @param threeDSServerTransID
  * @param callbackFn
  */
-function getResult(threeDSServerTransID, callbackFn) {
-  console.log("Get authentication result for threeDSServerTransID: ",
+function getBrwResult(threeDSServerTransID, callbackFn) {
+  console.log("Get brw authentication result for threeDSServerTransID: ",
       threeDSServerTransID);
-  $.get("/v2/auth/result", {txid: threeDSServerTransID})
+  _doGetResult("/v2/auth/brw/result", threeDSServerTransID, callbackFn,
+      "onAuthResult");
+}
+
+/**
+ * Method to 3ri brw authentication result
+ * @param threeDSServerTransID
+ * @param callbackFn
+ */
+function get3riResult(threeDSServerTransID, callbackFn) {
+  console.log("Get 3ri authentication result for threeDSServerTransID: ",
+      threeDSServerTransID);
+  _doGetResult("/v2/auth/3ri/result", threeDSServerTransID, callbackFn,
+      "on3RIResult");
+}
+
+function _doGetResult(url, threeDSServerTransID, callbackFn, eventType) {
+  $.get(url, {txid: threeDSServerTransID})
   .done(function (data) {
     console.log('returns:', data);
     if (data.transStatus) {
-      callbackFn("onAuthResult", data);
+      callbackFn(eventType, data);
     } else {
       callbackFn("onError", data);
     }
@@ -363,12 +422,12 @@ function _on3DSMethodFinished(transId, param) {
 /**
  * Default _callbackFn method for InitAuthTimeout event .
  */
-function _onInitAuthTimedOut(transId) {
+function _onInitAuthTimedOut(transId, param) {
   console.log('Init Auth has timed out due to 3DS method timing out or browser '
       + 'information collecting failed'
-      + ' now terminating the authentication process. transId=', transId);
+      + ' now continue the authentication. transId=', transId);
+  _doAuth(transId, param);
 
-  _onError({"Error": "InitAuth timeout"});
 }
 
 /**
@@ -379,7 +438,11 @@ function _onInitAuthTimedOut(transId) {
 function _on3RISuccess(data) {
   console.log('returns:', data);
   if (data.transStatus) {
-    _callbackFn("on3RIResult", data);
+    if (data.transStatus === "D") {
+      _startDecoupledAuth(data, get3riResult);
+    } else {
+      _callbackFn("on3RIResult", data);
+    }
   } else {
     _onError(data);
   }

@@ -54,7 +54,9 @@
       <div class="col-lg-6 order-3 order-lg-2 mt-4 mt-lg-0">
         <h2>Test pages</h2>
         <p>Test pages for Browser (BRW), 3DS Requestor Initiated (3RI), App authentications, as well
-          as the 3DS2 enrol check.</p>
+          as the 3DS2 enrol check. <br></bre><span class="text-muted">Disable Javascript in your browser and refresh the page to see
+          the test button for no-script environment.</span></p>
+
       </div>
       <div class="col-lg-6 order-2 order-lg-3">
         <p><a class="btn btn-primary" href="/shop" role="button">Launch &raquo;</a></p>
@@ -73,6 +75,15 @@
           <div class="col-md-3">
             <p><a class="btn btn-primary" href="/enrol" role="button">Enrol test &raquo;</a></p>
           </div>
+          <noscript>
+            <div class="col-md-12">
+              <p style="color: red">Javascript disabled. Press the button below to start
+                authentication.</p>
+              <p><a class="btn btn-primary" href="/noscript" role="button">No-Script test
+                &raquo;</a>
+              </p>
+            </div>
+          </noscript>
         </div>
       </div>
     </div>

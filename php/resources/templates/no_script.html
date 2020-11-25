@@ -1,0 +1,164 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+</head>
+<body>
+
+<noscript>
+  <div id="nav_bar">
+    <nav class="navbar navbar-light bg-light justify-content-between navbar-expand-lg">
+      <a class="navbar-brand" href="/">
+        <img src="/images/left-icon.ico" width="25" height="25" alt="">
+        3DS Requestor
+      </a>
+    </nav>
+  </div>
+  <div class="container">
+    <form action="/v2/auth/init/noscript" method="post" name="form">
+      <div class="row h-100 card-row">
+        <div class="col-lg-9">
+          <div class="card">
+            <div class="card-header">No-script</div>
+            <div class="card-body">
+              <div class="tab-content">
+                <div class="tab-pane fade show active" role="tabpanel"
+                     aria-labelledby="basicInfoTab">
+                  <dl class="row">
+
+                    <dt class="col-sm-4">Account Number: <span class="required">*</span></dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="acctNumber" class="form-control"
+                             list="acctNumberNoScr">
+                      <datalist id="acctNumberNoScr">
+                        <option value="4100000000000100">Frictionless authentication</option>
+                        <option value="4100000000005000">Challenge authentication</option>
+                        <option value="4100000000100009">Authentication attempt</option>
+                        <option value="4100000000300005">Authentication failed</option>
+                        <option value="4100000000400003">Authentication unavailable</option>
+                        <option value="4100000000500000">Authentication reject</option>
+                      </datalist>
+
+                    </dd>
+
+                    <dt class="col-sm-4">Merchant ID: <span class="required">*</span></dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="merchantIdNoSrc" name="merchantId"
+                             value="123456789012345">
+                    </dd>
+
+                    <dt class="col-sm-4">Trans-type:</dt>
+                    <dd class="col-sm-8">
+                      <div class="form-check form-check-inline">
+                        <input type="radio" id="testlabs" name="trans-type" value="testLabs"
+                               class="form-check-input" checked>
+                        <label class="form-check-label" for="testlabs">TestLab</label>
+                      </div>
+                      <div class="form-check form-check-inline">
+                        <input type="radio" id="prod" name="trans-type" value="prod"
+                               class="form-check-input">
+                        <label class="form-check-label" for="prod">Production</label>
+                      </div>
+                    </dd>
+
+                    <dt class="col-sm-4">Message Version:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="messageVersion"
+                             name="messageVersion"
+                             value="2.1.0">
+                    </dd>
+
+                    <dt class="col-sm-4">Authentication Ind:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="authenticationInd"
+                             name="authenticationInd" value="01">
+                    </dd>
+
+                    <dt class="col-sm-4">Purchase Amount:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="purchaseAmount"
+                             name="purchaseAmount"
+                             value="10000">
+                    </dd>
+
+                    <dt class="col-sm-4">Purchase Currency:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="purchaseCurrency"
+                             name="purchaseCurrency"
+                             value="036">
+                    </dd>
+
+                    <dt class="col-sm-4">Message Category:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="messageCategory"
+                             name="messageCategory"
+                             value="pa">
+                    </dd>
+
+                    <dt class="col-sm-4">Purchase Date:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="purchaseDate" name="purchaseDate"
+                             value="20201111000101">
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Dec Req Ind:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="threeDSRequestorDecReqInd"
+                             name="threeDSRequestorDecReqInd"
+                             value="">
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Dec Max Time:</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" class="form-control" id="threeDSRequestorDecMaxTime"
+                             name="threeDSRequestorDecMaxTime"
+                             value="">
+                    </dd>
+
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 mb-4">
+          <div class="btn-group btn-block">
+            <button class="btn btn-primary btn-lg" type="submit">
+              Test No-Script
+            </button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</noscript>
+
+</body>
+</html>

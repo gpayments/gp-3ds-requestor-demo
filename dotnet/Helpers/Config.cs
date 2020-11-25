@@ -27,6 +27,7 @@ namespace GPayments.Requestor.TestLab.Helpers
         public static string AsAuthUrl { get { return ConfigurationManager.AppSettings["AsAuthUrl"] ?? ""; } }
         public static string BaseUrl { get { return ConfigurationManager.AppSettings["BaseUrl"] ?? ""; } }
         public static string CertFileName { get { return ConfigurationManager.AppSettings["CertFileName"] ?? ""; } }
+        public static string CertFilePassword { get { return ConfigurationManager.AppSettings["CertFilePassword"] ?? ""; } }
         public static bool GroupAuth { get { return Convert.ToBoolean(ConfigurationManager.AppSettings["GroupAuth"] ?? "false"); } }
         public static string MerchantToken { get { return ConfigurationManager.AppSettings["MerchantToken"] ?? ""; } }
     }

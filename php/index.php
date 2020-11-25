@@ -1,4 +1,6 @@
-<?php
+<?php session_start();
+echo session_save_path();
+
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -16,13 +18,15 @@
  *
  *
  */
-
 require_once "config/Config.php";
 require_once "config/RestClientConfig.php";
+require_once "config/TemplateResolver.php";
 require_once "config/Router.php";
 require_once "config/Utils.php";
+require_once "consts/SessionKeys.php";
 
 require_once "controllers/AuthControllerV1.php";
+require_once "services/AuthServiceV2.php";
 require_once "controllers/AuthControllerV2.php";
 require_once "controllers/MainController.php";
 

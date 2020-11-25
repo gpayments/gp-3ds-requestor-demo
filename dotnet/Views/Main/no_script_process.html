@@ -1,0 +1,65 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+</head>
+<body>
+
+<noscript>
+  <div id="nav_bar">
+    <nav class="navbar navbar-light bg-light justify-content-between navbar-expand-lg">
+      <a class="navbar-brand" href="/">
+        <img src="/images/left-icon.ico" width="25" height="25" alt="">
+        3DS Requestor
+      </a>
+    </nav>
+  </div>
+
+  <div class="container">
+    <form action="/v2/auth/init/noscript" method="post" name="form">
+      <div class="row h-100 card-row">
+        <div class="col-lg-9 noscriptIframeContainer">
+          <iframe src={{{threeDSServerCallbackUrl}}} width="100%" height="100%"
+                  style="border:0"></iframe>
+        </div>
+        <div class="col-lg-3 mb-4">
+          <div class="btn-group btn-block">
+            <a class="btn btn-primary btn-lg" href="/noscript">
+              Back
+            </a>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</noscript>
+
+</body>
+</html>

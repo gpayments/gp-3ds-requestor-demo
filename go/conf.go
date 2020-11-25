@@ -25,11 +25,12 @@ import (
 )
 
 type GPayments struct {
-	AsAuthUrl     string `yaml:"asAuthUrl"`
-	BaseUrl       string `yaml:"baseUrl"`
-	CertFileName  string `yaml:"certFileName"`
-	GroupAuth     bool   `yaml:"groupAuth"`
-	MerchantToken string `yaml:"merchantToken"`
+	AsAuthUrl        string `yaml:"asAuthUrl"`
+	BaseUrl          string `yaml:"baseUrl"`
+	CertFileName     string `yaml:"certFileName"`
+	CertFilePassword string `yaml:"certFilePassword"`
+	GroupAuth        bool   `yaml:"groupAuth"`
+	MerchantToken    string `yaml:"merchantToken"`
 }
 
 type Server struct {

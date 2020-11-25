@@ -1,0 +1,44 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DSecure 2.0 Authentication Test</title>
+  <link rel="stylesheet" href="/css/style.css"/>
+  <meta http-equiv=Refresh content='1; URL=/v2/auth/result/noscript/poll?transId={{transId}}'>
+</head>
+<body>
+
+<noscript>
+  <span>Decoupled authentication processing...</span>
+  <div class="noScriptContainer">
+    <p>
+      <span>Polling authentication result every second</span>
+    </p>
+    {{#cardholderInfo}}
+    <pre>{{cardholderInfo}}</pre>
+    {{/cardholderInfo}}
+  </div>
+
+</noscript>
+
+
+</body>
+</html>

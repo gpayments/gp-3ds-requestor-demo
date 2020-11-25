@@ -1,4 +1,5 @@
-<?php
+<?php session_start();
+
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -16,85 +17,125 @@
  *
  *
  */
-
 class MainController
 {
 
     private $config;
-    private $model = array();
     private $restTemplate;
+    private $templateResolver;
 
-    function __construct(Config $config, RestClientConfig $restTemplate)
+    function __construct(Config $config, RestClientConfig $restTemplate, TemplateResolver $templateResolver)
     {
         $this->config = $config;
         $this->restTemplate = $restTemplate;
+        $this->templateResolver = $templateResolver;
     }
 
     public function index()
     {
-        $this->_render("index");
+        $this->templateResolver->_render("index");
     }
 
     public function shop()
     {
-        $this->_render("shop");
+        $this->templateResolver->_render("shop");
     }
 
     public function app()
     {
-        $this->model["callbackUrl"] = $this->config->getBaseUrl();
-        $this->model["serverUrl"] = $this->config->getAsAuthUrl();
-        $this->_render("app");
+        $model = array();
+        $model["callbackUrl"] = $this->config->getBaseUrl();
+        $model["serverUrl"] = $this->config->getAsAuthUrl();
+        $this->templateResolver->_render("app", $model);
     }
 
 
     public function checkout()
     {
-        $this->_render("checkout");
+        $this->templateResolver->_render("checkout");
     }
 
     public function processV1()
     {
-        $this->_render("v1/process");
+        $this->templateResolver->_render("v1/process");
     }
 
     public function processV2()
     {
-        $this->_render("v2/process");
+        $this->templateResolver->_render("v2/process");
     }
 
 
     public function brw()
     {
-        $this->model["callbackUrl"] = $this->config->getBaseUrl();
-        $this->model["serverUrl"] = $this->config->getAsAuthUrl();
-        $this->_render("brw");
+        $model = array();
+        $model["callbackUrl"] = $this->config->getBaseUrl();
+        $model["serverUrl"] = $this->config->getAsAuthUrl();
+        $this->templateResolver->_render("brw", $model);
     }
 
     public function enrol()
     {
-        $this->model["callbackUrl"] = $this->config->getBaseUrl();
-        $this->model["serverUrl"] = $this->config->getAsAuthUrl();
-        $this->_render("enrol");
+        $model = array();
+        $model["callbackUrl"] = $this->config->getBaseUrl();
+        $model["serverUrl"] = $this->config->getAsAuthUrl();
+        $this->templateResolver->_render("enrol", $model);
     }
 
     public function threeRI()
     {
-        $this->model["callbackUrl"] = $this->config->getBaseUrl();
-        $this->model["serverUrl"] = $this->config->getAsAuthUrl();
-        $this->_render("3ri");
+        $model = array();
+        $model["callbackUrl"] = $this->config->getBaseUrl();
+        $model["serverUrl"] = $this->config->getAsAuthUrl();
+        $this->templateResolver->_render("3ri", $model);
     }
 
     public function resultV1()
     {
-        $this->_render("v1/result");
+        $this->templateResolver->_render("v1/result");
     }
 
     public function resultV2()
     {
-        $this->_render("v2/result");
+        $this->templateResolver->_render("v2/result");
     }
 
+    public function noScript()
+    {
+        $this->templateResolver->_render("no_script");
+    }
+
+
+    /**
+     * Handles the notification event from the iframe in no javascript mode.
+     * threeDSServerCallbackURL or the challengeUrl.
+     */
+    public function notifyNoScript()
+    {
+        $requestorTransId = $_POST["requestorTransId"];
+        $callbackType = $_POST["event"];
+        $param = (isset($_POST["param"]) && !empty($_POST["param"])) ? $_POST["param"] : "";
+
+//        var_dump($_SESSION);
+        if ($callbackType === "3DSMethodFinished"
+            || $callbackType === "3DSMethodSkipped"
+            || $callbackType === "InitAuthTimedOut") {
+
+            Utils::_redirect("/v2/auth/noscript?transId=" . $requestorTransId . "&param=" . $param);
+
+        } else if ($callbackType === "AuthResultReady") {
+            Utils::_redirect("/v2/auth/brw/result/noscript?transId=" . $requestorTransId);
+        } else {
+            echo "invalid callback type";
+            exit;
+        }
+    }
+
+
+    /**
+     * Handles the notification event from the iframe.
+     * threeDSServerCallbackURL or the challengeUrl.
+     */
     public function notifyResult()
     {
         $requestorTransId = $_POST["requestorTransId"];
@@ -120,23 +161,11 @@ class MainController
             exit;
         }
 
-        $this->model["transId"] = $requestorTransId;
-        $this->model["callbackName"] = $callbackName;
-        $this->model["callbackParam"] = $param;
+        $model = array();
+        $model["transId"] = $requestorTransId;
+        $model["callbackName"] = $callbackName;
+        $model["callbackParam"] = $param;
 
-        $this->_render("notify_3ds_events");
-    }
-
-    private function _render($template)
-    {
-        Mustache_Autoloader::register();
-        $options = array('extension' => '.html');
-
-        $m = new Mustache_Engine(array(
-            'loader' => new Mustache_Loader_FilesystemLoader(dirname(__DIR__) . '/resources/templates', $options),
-        ));
-
-        echo $m->render($template, $this->model);
-        exit;
+        $this->templateResolver->_render("notify_3ds_events", $model);
     }
 }

@@ -1,4 +1,4 @@
-<?php
+<?php session_start();
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -82,7 +82,7 @@ class AuthControllerV1
     }
 
     /**
-     * Receives the Request for authentication result request (Step 15(F) and Step 20(C))
+     * Receives the Request for authentication result request (Step 15(F), Step 27(C) or Step 20(D))
      * Send data to ActiveServer to Retrieve Authentication Results
      */
     public function result()
@@ -91,10 +91,10 @@ class AuthControllerV1
         //ActiveServer url for Retrieve Results
         $resultUrl = "/api/v1/auth/brw/result?threeDSServerTransID=" . $serverTransId;
 
-        //Get authentication result from ActiveServer (Step 16(F) and Step 21(C))
+        //Get authentication result from ActiveServer (Step 16(F), Step 27(C) or Step 20(D))
         $response = $this->restTemplate->get($resultUrl);
 
-        //Show authentication results on result.html (Step 17(F) and Step 22(C))
+        //Show authentication results on result.html (Step 17(F), Step 27(C) or Step 20(D))
         Utils::_returnJson($response->getBody()->getContents());
     }
 

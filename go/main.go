@@ -20,19 +20,32 @@ package main
 
 import (
 	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"github.com/cbroglie/mustache"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/kr/pretty"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 )
 
-type respHandler func([]byte) error
+type Message = map[string]interface{}
+
+type asSession struct {
+	message    Message
+	url        string
+	context    *gin.Context
+	httpClient *http.Client
+	config     *Config
+	rHandler   respHandler
+}
+
+type respHandler func(resp []byte, contentType string, context *gin.Context) error
 
 func main() {
 
@@ -52,17 +65,29 @@ func main() {
 	r := gin.Default()
 
 	//use session
-	store := cookie.NewStore([]byte("secret"))
+	gob.Register(Message{})   //register type Message so the session can be persisted
+	gob.Register(uuid.UUID{}) //register type UUID so the session can be persisted
+	store := memstore.NewStore([]byte("secret"))
+	store.Options(sessions.Options{
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false, //Secure should be true for production environment
+	})
 	r.Use(sessions.Sessions("requestor-session", store))
+
+	fp := &mustache.FileProvider{
+		Paths:      []string{"web"},
+		Extensions: []string{".html"},
+	}
 
 	//auth controller router v1
 	authControllerV1(r, config, httpClient)
 
 	//auth controller router v2
-	authControllerV2(r, config, httpClient)
+	authControllerV2(r, config, httpClient, fp)
 
 	//Main Controller router
-	mainController(r, config, httpClient)
+	mainController(r, config, fp)
 
 	//static resources
 	r.Static("/js", "web/js")
@@ -74,11 +99,7 @@ func main() {
 }
 
 //Main controller
-func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
-	fp := &mustache.FileProvider{
-		Paths:      []string{"web"},
-		Extensions: []string{".html"},
-	}
+func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 
 	indexTpl := loadTemplate("web/index.html", fp)
 	shopTpl := loadTemplate("web/shop.html", fp)
@@ -88,6 +109,7 @@ func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
 	enrolTpl := loadTemplate("web/enrol.html", fp)
 	checkoutTpl := loadTemplate("web/checkout.html", fp)
 	notify3DSEventsTpl := loadTemplate("web/notify_3ds_events.html", fp)
+	noscriptTpl := loadTemplate("web/no_script.html", fp)
 
 	//v1 process and result pages
 	resultTplv1 := loadTemplate("web/v1/result.html", fp)
@@ -133,6 +155,10 @@ func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
 
 	r.GET("/checkout", func(c *gin.Context) {
 		renderPage(gin.H{}, checkoutTpl, c)
+	})
+
+	r.GET("/noscript", func(c *gin.Context) {
+		renderPage(gin.H{}, noscriptTpl, c)
 	})
 
 	r.GET("/v1/process", func(c *gin.Context) {
@@ -198,229 +224,46 @@ func mainController(r *gin.Engine, config *Config, httpClient *http.Client) {
 		}, notify3DSEventsTpl, c)
 	})
 
-}
+	r.POST("/3ds-notify/noscript", func(c *gin.Context) {
 
-//AuthController routers v1
-func authControllerV1(r *gin.Engine, config *Config, httpClient *http.Client) {
-	r.POST("/v1/auth/init/:messageCategory", func(c *gin.Context) {
-
-		var message map[string]interface{}
-
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		//adding requestorTransId
-		message["threeDSRequestorTransID"] = uuid.New()
-		//add callback event url
-		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
-
-		//Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
-		//For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v1/auth/brw/init?trans-type=prod
-		//For more details, refer to: https://docs.activeserver.cloud
-		callASAPI(message, appendTransTypeIfNecessary("/api/v1/auth/brw/init/"+c.Param("messageCategory"), c), c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v1/auth", func(c *gin.Context) {
-
-		var message map[string]interface{}
-
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		callASAPI(message, "/api/v1/auth/brw", c, httpClient, config, nil)
-
-	})
-
-	r.GET("/v1/auth/result", func(c *gin.Context) {
-
-		transId := c.Query("txid")
+		transId := c.PostForm("requestorTransId")
 		if transId == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid transId"})
-			return
-
-		}
-
-		callASAPI(nil, "/api/v1/auth/brw/result?threeDSServerTransID="+transId, c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v1/auth/3ri", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid requestorTransId"})
 			return
 		}
-		//adding requestorTransId
-		message["threeDSRequestorTransID"] = uuid.New()
 
-		callASAPI(message, appendTransTypeIfNecessary("/api/v1/auth/3ri/npa", c), c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v1/auth/challenge/status", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		event := c.PostForm("event")
+		if event == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid event type"})
 			return
 		}
-		callASAPI(message, "/api/v1/auth/challenge/status", c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v1/auth/enrol", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		param := c.PostForm("param")
+		if param == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid param"})
 			return
 		}
-		callASAPI(message, appendTransTypeIfNecessary("/api/v1/auth/enrol", c), c, httpClient, config, nil)
 
+		if event == "3DSMethodFinished" || event == "3DSMethodSkipped" || event == "InitAuthTimedOut" {
+			//continue the authentication
+			c.Redirect(http.StatusFound, "/v2/auth/noscript?param="+param+"&transId="+transId)
+		} else if event == "AuthResultReady" {
+			//continue to get result
+			c.Redirect(http.StatusFound, "/v2/auth/brw/result/noscript")
+		} else {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid callback event"})
+		}
 	})
 
 }
 
-//AuthController routers v2
-func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client) {
-	r.POST("/v2/auth/init", func(c *gin.Context) {
-
-		var message map[string]interface{}
-
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		//adding requestorTransId
-		message["threeDSRequestorTransID"] = uuid.New()
-		//add callback event url
-		message["eventCallbackUrl"] = config.GPayments.BaseUrl + "/3ds-notify"
-
-		//Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
-		//For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
-		//For more details, refer to: https://docs.activeserver.cloud
-		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/brw/init", c), c, httpClient, config, func(resp []byte) error {
-			//store the response in current session.
-
-			authUrl, err := getAuthUrl(resp)
-
-			if err != nil {
-				return err
-			}
-			session := sessions.Default(c)
-			session.Set("authUrl", authUrl)
-			_ = session.Save()
-			return nil
-		})
-	})
-
-	r.POST("/v2/auth", func(c *gin.Context) {
-
-		//get authUrl from session
-		session := sessions.Default(c)
-		authUrl := session.Get("authUrl").(string)
-		if authUrl == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid authUrl"})
-			return
-		}
-
-		var message map[string]interface{}
-
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		callASAPIWithUrl(message, authUrl, c, httpClient, config, nil)
-
-	})
-
-	r.GET("/v2/auth/result", func(c *gin.Context) {
-
-		transId := c.Query("txid")
-		if transId == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid transId"})
-			return
-
-		}
-
-		callASAPI(nil, "/api/v2/auth/brw/result?threeDSServerTransID="+transId, c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v2/auth/app", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		//adding requestorTransId
-		message["threeDSRequestorTransID"] = uuid.New()
-
-		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/app", c), c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v2/auth/3ri", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		//adding requestorTransId
-		message["threeDSRequestorTransID"] = uuid.New()
-
-		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/3ri", c), c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v2/auth/challenge/status", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		callASAPI(message, "/api/v2/auth/challenge/status", c, httpClient, config, nil)
-
-	})
-
-	r.POST("/v2/auth/enrol", func(c *gin.Context) {
-		var message map[string]interface{}
-		err := c.ShouldBindJSON(&message)
-		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		callASAPI(message, appendTransTypeIfNecessary("/api/v2/auth/enrol", c), c, httpClient, config, nil)
-
-	})
-}
-
-//return the authUrl from initAuthResponse, v2 only
-func getAuthUrl(bytes []byte) (string, error) {
-	var msg map[string]interface{}
+func parseMap(bytes []byte) (Message, error) {
+	//convert to map
+	var msg Message
 	err := json.Unmarshal(bytes, &msg)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	return msg["authUrl"].(string), nil
-
+	return msg, nil
 }
 
 func loadTemplate(page string, fp *mustache.FileProvider) *mustache.Template {
@@ -434,45 +277,39 @@ func loadTemplate(page string, fp *mustache.FileProvider) *mustache.Template {
 }
 
 //call ActiveServer API, if message == nil, do GET otherwise POST, return response if any
-func callASAPI(message map[string]interface{},
-	url string,
-	c *gin.Context,
-	httpClient *http.Client,
-	config *Config,
-	rHandler respHandler) {
-	//add ActiveServer base URL
-	callASAPIWithUrl(message, config.GPayments.AsAuthUrl+url, c, httpClient, config, rHandler)
-}
-func callASAPIWithUrl(
-	message map[string]interface{},
-	url string,
-	c *gin.Context,
-	httpClient *http.Client,
-	config *Config,
-	rHandler respHandler) {
+func callASAPI(session asSession) {
 
 	var r *http.Request
 	var err error
 
-	log.Println("Calling 3DS Server, url: " + url)
+	//generate the url, if the url starts with http, use it as is otherwise prefix with the base URL
+	var url string
+	if strings.HasPrefix(strings.ToLower(session.url), "http") {
+		url = session.url
+	} else {
+		url = session.config.GPayments.AsAuthUrl + session.url
+	}
 
-	if message == nil {
+	if session.message == nil {
+		log.Println("Send GET request to 3DS Server, url: " + url)
 		r, err = http.NewRequest("GET", url, nil)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			session.context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 	} else {
 		var data []byte
-		data, err = json.Marshal(message)
+		data, err = json.Marshal(session.message)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			session.context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
+		log.Printf("Send POST request to 3DS Server, url: %s, body: %v\n", url, session.message)
+
 		r, err = http.NewRequest("POST", url, bytes.NewBuffer(data))
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			session.context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 		r.Header.Set("Content-Type", "application/json;charset=utf-8")
@@ -480,13 +317,13 @@ func callASAPIWithUrl(
 	}
 
 	//if this is groupAuth
-	if config.GPayments.GroupAuth {
-		r.Header.Set("AS-Merchant-Token", config.GPayments.MerchantToken)
+	if session.config.GPayments.GroupAuth {
+		r.Header.Set("AS-Merchant-Token", session.config.GPayments.MerchantToken)
 	}
 
-	response, err := httpClient.Do(r)
+	response, err := session.httpClient.Do(r)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		session.context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	defer response.Body.Close()
@@ -495,23 +332,26 @@ func callASAPIWithUrl(
 	responseBody, err := ioutil.ReadAll(response.Body)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		session.context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	if rHandler != nil {
+	log.Printf("Received response with content type: %s, content: %s\n", contentType, string(responseBody))
 
-		if err = rHandler(responseBody); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if session.rHandler != nil {
+
+		//process the response by the responseHandler. the handle returns the data as well.
+		if err = session.rHandler(responseBody, contentType, session.context); err != nil {
+			session.context.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
+	} else {
+		//if no response handler provided, return the data by default.
+		session.context.Data(http.StatusOK, contentType, responseBody)
 	}
-
-	c.Data(http.StatusOK, contentType, responseBody)
-
 }
 
-func renderPage(data map[string]interface{}, tpl *mustache.Template, c *gin.Context) {
+func renderPage(data Message, tpl *mustache.Template, c *gin.Context) {
 	page, err := tpl.Render(data)
 
 	if err != nil {
@@ -524,13 +364,28 @@ func renderPage(data map[string]interface{}, tpl *mustache.Template, c *gin.Cont
 }
 
 //check and append trans type to the destination url if the trans type parameter is provided
-func appendTransTypeIfNecessary(url string, c *gin.Context) string {
-	p, ok := c.GetQuery("trans-type")
-
-	if ok && "prod" == p {
+//if overriding has values, use the first string
+func appendTransTypeIfNecessary(url string, c *gin.Context, overriding ...string) string {
+	var transType string
+	if len(overriding) > 0 {
+		transType = overriding[0]
+	} else {
+		transType, _ = c.GetQuery("trans-type")
+	}
+	if "prod" == transType {
 		return url + "?trans-type=prod"
 	} else {
 		return url
 	}
 
+}
+
+//get session attribute from the session store, v2 only
+func getSessionAttribute(ctx *gin.Context, msgType int, key string) interface{} {
+	session := sessions.Default(ctx)
+	m := session.Get(msgType)
+	if m == nil {
+		return nil
+	}
+	return m.(Message)[key]
 }

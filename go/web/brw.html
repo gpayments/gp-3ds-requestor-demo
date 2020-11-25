@@ -204,14 +204,9 @@
 
                     <dt class="col-sm-4">Challenge Indicator</dt>
                     <dd class="col-sm-8">
-                      <select id="challengeInd" class="form-control">
-                        <option value=""></option>
-                        <option value="01" selected>No preference (01)</option>
-                        <option value="02">No challenge requested (02)</option>
-                        <option value="03">Challenge requested: 3DS Requestor Preference (03)
-                        </option>
-                        <option value="04">Challenge requested: Mandate (04)</option>
-                      </select>
+                      <input type="text" id="challengeInd" class="form-control"
+                             value="01"
+                      />
                     </dd>
 
                     <dt class="col-sm-4">Purchase Date</dt>
@@ -244,6 +239,50 @@
                     <dt class="col-sm-4">Overridden Merchant Name</dt>
                     <dd class="col-sm-8">
                       <input type="text" id="merchantName" class="form-control" value=""/>
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Auth Method Indicator</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="threeDSReqAuthMethodInd" class="form-control"
+                             value=""/>
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Decoupled Max Time</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="threeDSRequestorDecMaxTime" class="form-control"
+                             value=""/>
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Decoupled Request Indicator</dt>
+                    <dd class="col-sm-8">
+                      <select id="threeDSRequestorDecReqInd" class="form-control">
+                        <option value="" selected></option>
+                        <option value="Y">Decoupled Authentication is supported and preferred (Y)
+                        </option>
+                        <option value="N">Do not use Decoupled Authentication (N)</option>
+                      </select>
+                    </dd>
+
+                    <dt class="col-sm-4">Whitelist Status</dt>
+                    <dd class="col-sm-8">
+                      <select id="whiteListStatus" class="form-control">
+                        <option value="" selected></option>
+                        <option value="Y">3DS Requestor is whitelisted by cardholder (Y)</option>
+                        <option value="N">3DS Requestor is not whitelisted by cardholder (N)
+                        </option>
+                        <option value="E">Not eligible as determined by issuer (E)</option>
+                        <option value="P">Pending confirmation by cardholder (P)</option>
+                        <option value="R">Cardholder rejected (R)</option>
+                        <option value="U">Whitelist status unknown, unavailable, or does not apply
+                          (U)
+                        </option>
+                      </select>
+                    </dd>
+
+                    <dt class="col-sm-4">Whitelist Status Source</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="whiteListStatusSource" class="form-control"
+                             value=""/>
                     </dd>
                   </dl>
                 </div>
@@ -289,7 +328,7 @@
                 <hr>
                 <dl class="row">
                   <dt class="col-sm-12 text-secondary" style="margin-bottom: .5rem">3DS requestor
-                    can decide whether to proceed the challenge or not. By select the following
+                    can decide whether to proceed the challenge or not. By selecting the following
                     checkbox, the requestor will cancel the challenge.
                   </dt>
 
@@ -305,6 +344,25 @@
                       <option value="CReqNotSent" selected>CReq Not Sent</option>
                       <option value="AuthResultNotDelivered">Auth Result Not Delivered</option>
                       <option value="">No Reason Sent</option>
+                    </select>
+                  </dd>
+
+                  <dt class="col-sm-12 text-secondary"
+                      style="padding-top: .5rem;padding-bottom: .5rem">3DS requestor
+                    can decide the challenge window size by selecting the following
+                    options. 3DS requestor needs to make sure the iframe container has the same size
+                    as defined below.
+                  </dt>
+
+                  <dt class="col-sm-4">Challenge Window Size (width x height in pixels)</dt>
+                  <dd class="col-sm-8">
+                    <select id="challengeWindowSize" class="form-control">
+                      <option value="" selected></option>
+                      <option value="01">250 x 400 (01)</option>
+                      <option value="02">390 x 400 (02)</option>
+                      <option value="03">500 x 600 (03)</option>
+                      <option value="04">600 x 400 (04)</option>
+                      <option value="05">Full screen (05)</option>
                     </select>
                   </dd>
                 </dl>
@@ -336,6 +394,7 @@
 <script src="/js/test-lab-scenarios.js"></script>
 
 <script>
+
   showActionButton("testButton", "Test BRW", "onClick");
   genApiOption();
 
@@ -371,7 +430,10 @@
     var sessionData = genSessionData();
     sessionData.authData.messageCategory = $("input[name=messageCategoryForm]:checked").val();
     sessionData.transType = $("input[name=dsChannelForm]:checked").val();
-
+    var messageVersion = $("input[name=messageVersionForm]:checked").val();
+    if (messageVersion) {
+      sessionData.authData.messageVersion = messageVersion;
+    }
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 
     window.location.href = "/v2/process";
@@ -495,6 +557,31 @@
       authData.merchantName = merchantName;
     }
 
+    var threeDSReqAuthMethodInd = $('#threeDSReqAuthMethodInd').val();
+    if (threeDSReqAuthMethodInd) {
+      authData.threeDSReqAuthMethodInd = threeDSReqAuthMethodInd;
+    }
+
+    var threeDSRequestorDecMaxTime = $('#threeDSRequestorDecMaxTime').val();
+    if (threeDSRequestorDecMaxTime) {
+      authData.threeDSRequestorDecMaxTime = threeDSRequestorDecMaxTime;
+    }
+
+    var threeDSRequestorDecReqInd = $('#threeDSRequestorDecReqInd').val();
+    if (threeDSRequestorDecReqInd) {
+      authData.threeDSRequestorDecReqInd = threeDSRequestorDecReqInd;
+    }
+
+    var whiteListStatus = $('#whiteListStatus').val();
+    if (whiteListStatus) {
+      authData.whiteListStatus = whiteListStatus;
+    }
+
+    var whiteListStatusSource = $('#whiteListStatusSource').val();
+    if (whiteListStatusSource) {
+      authData.whiteListStatusSource = whiteListStatusSource;
+    }
+
     return authData;
   }
 
@@ -506,6 +593,10 @@
       if (cancelReason) {
         options.cancelReason = cancelReason;
       }
+    }
+    var challengeWindowSize = $("#challengeWindowSize").val();
+    if (challengeWindowSize) {
+      options.challengeWindowSize = challengeWindowSize;
     }
     return options;
   }
@@ -535,7 +626,7 @@
   }
 
   $(document).ready(function () {
-    $("#purchaseDate").val(moment().format('YYYYMMDDhhmmss'));
+    $("#purchaseDate").val(moment().utc().format('YYYYMMDDHHmmss'));
     var apiVersion = getApiVersion();
     updateActionButtonText(apiVersion, $("#testButton"), "Test BRW");
     $("#apiVersionForm").val(apiVersion);

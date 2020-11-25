@@ -103,7 +103,10 @@
 {{>contents/deps}}
 <script>
   showActionButton("testButton", "Test Enrol", "onClick");
-  genApiOption();
+
+  //remove the messageVersion in channel
+  $("#mvLabel").addClass("d-none");
+  $("#mvContainer").addClass("d-none");
 
   function onClick() {
 

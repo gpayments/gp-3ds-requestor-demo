@@ -1,4 +1,13 @@
-<?php
+<?php session_start();
+
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\MessageFormatter;
+use GuzzleHttp\Middleware;
+use Monolog\Handler\StreamHandler;
+use Monolog\Logger;
+
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -16,22 +25,31 @@
  *
  *
  */
-
 class RestClientConfig
 {
 
     const CA_CERTS_FILE_PATH = "resources/certs/cacerts.pem";
 
-    private $client = null;
+    private $client;
     private $headers = [];
 
     public function __construct(Config $config)
     {
+        $logger = new Logger('Logger');
+        $logger->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG)); // <<< uses a stream
+        $stack = HandlerStack::create();
+        $stack->push(
+            Middleware::log(
+                $logger,
+                new MessageFormatter('{req_body} - {res_body}')
+            )
+        );
         $this->client = new GuzzleHttp\Client([
             'base_uri' => $config->getAsAuthUrl(),
             'cert' => [$config->getCertFileName(), ''],
             'ssl_key' => $config->getKeyFileName(),
             "verify" => self::CA_CERTS_FILE_PATH,
+            'handler' => $stack,
         ]);
 
         if ($config->isGroupAuth()) {
@@ -41,17 +59,28 @@ class RestClientConfig
 
     function post($request_uri, $post_data)
     {
-        $response = $this->client->request(
-            "POST",
-            $request_uri,
-            ['json' => $post_data, 'headers' => $this->headers]);
-        return $response;
+        try {
+            return $this->client->request(
+                "POST",
+                $request_uri,
+                ['json' => $post_data, 'headers' => $this->headers]);
+
+        } catch (BadResponseException $e) {
+            Utils::_returnJson($e->getResponse()->getBody(), $e->getCode());
+        } catch (GuzzleException $e) {
+            Utils::_returnJson($e->getMessage(), 500);
+        }
     }
 
     function get($request_uri)
     {
-        $response = $this->client->request("GET", $request_uri, ['headers' => $this->headers]);
-        return $response;
+        try {
+            return $this->client->request("GET", $request_uri, ['headers' => $this->headers]);
+        } catch (BadResponseException $e) {
+            Utils::_returnJson($e->getResponse()->getBody(), $e->getCode());
+        } catch (GuzzleException $e) {
+            Utils::_returnJson($e->getMessage(), 500);
+        }
     }
 
 }

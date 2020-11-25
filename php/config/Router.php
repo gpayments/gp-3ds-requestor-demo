@@ -1,4 +1,4 @@
-<?php
+<?php session_start();
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -23,12 +23,14 @@ class Router
     private $authControllerV1;
     private $authControllerV2;
 
+
     function __construct($config)
     {
         $restTemplate = new RestClientConfig($config);
-        $this->mainController = new MainController($config, $restTemplate);
+        $templateResolver = new TemplateResolver();
+        $this->mainController = new MainController($config, $restTemplate, $templateResolver);
         $this->authControllerV1 = new AuthControllerV1($config, $restTemplate);
-        $this->authControllerV2 = new AuthControllerV2($config, $restTemplate);
+        $this->authControllerV2 = new AuthControllerV2($config, $restTemplate, $templateResolver);
     }
 
     public function route($path)
@@ -54,18 +56,28 @@ class Router
         } else if (startsWith($path, '/v2/auth')) {
             if ($path === "/v2/auth/init") {
                 $this->authControllerV2->initAuth();
-            } else if ($path === "/v2/auth/result") {
-                $this->authControllerV2->result();
+            } else if ($path === "/v2/auth/brw/result") {
+                $this->authControllerV2->brwResult();
             } else if ($path === "/v2/auth") {
                 $this->authControllerV2->auth();
             } else if ($path === "/v2/auth/3ri") {
                 $this->authControllerV2->threeRI();
+            } else if ($path === "/v2/auth/3ri/result") {
+                $this->authControllerV2->threeRIResult();
             } else if ($path === "/v2/auth/challenge/status") {
                 $this->authControllerV2->challengeStatus();
             } else if ($path === "/v2/auth/app") {
                 $this->authControllerV2->app();
             } else if ($path === "/v2/auth/enrol") {
                 $this->authControllerV2->enrolCheck();
+            } else if ($path === "/v2/auth/init/noscript") {
+                $this->authControllerV2->initAuthNoScript();
+            } else if ($path === "/v2/auth/noscript") {
+                $this->authControllerV2->authNoScript();
+            } else if ($path === "/v2/auth/brw/result/noscript") {
+                $this->authControllerV2->resultNoScript();
+            } else if ($path === "/v2/auth/result/noscript/poll") {
+                $this->authControllerV2->pollResult();
             }
         } else {
             if (empty($path) || $path === "/") {
@@ -88,12 +100,14 @@ class Router
                 $this->mainController->resultV1();
             } else if ($path === "/v2/result") {
                 $this->mainController->resultV2();
-            } else if ($path === "/3ds-notify") {
-                $this->mainController->notifyResult();
-            } else if ($path === "/auth/enrol") {
-                $this->mainController->enrolCheck();
             } else if ($path === "/app") {
                 $this->mainController->app();
+            } else if ($path === "/noscript") {
+                $this->mainController->noScript();
+            } else if ($path === "/3ds-notify/noscript") {
+                $this->mainController->notifyNoScript();
+            } else if ($path === "/3ds-notify") {
+                $this->mainController->notifyResult();
             }
 
         }

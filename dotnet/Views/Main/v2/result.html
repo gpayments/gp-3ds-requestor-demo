@@ -49,10 +49,10 @@
 <script>
   var serverTransId = sessionStorage.getItem("serverTransId");
 
-  //send request for authentication result (Step 15(F) or Step 20(C))
-  result(serverTransId, showData);
+  //send request for authentication result
+  getBrwResult(serverTransId, showData);
 
-  //show result in separate page (Step 17(F) or Step 22(C))
+  //show result in separate page
   function showData(type, data) {
     var toShow = "<dl class='row'>";
     Object.keys(data).forEach(function (k) {

@@ -103,12 +103,12 @@
                     <dd class="col-sm-8">
                       <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="messageCategoryForm"
-                               id="mess-cate-pa" value="pa" disabled>
+                               id="mess-cate-pa" value="pa">
                         <label class="form-check-label" for="mess-cate-pa">Payment Auth</label>
                       </div>
                       <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="messageCategoryForm"
-                               id="mess-cate-npa" value="npa" checked disabled>
+                               id="mess-cate-npa" value="npa" checked>
                         <label class="form-check-label" for="mess-cate-npa">Non-payment Auth</label>
                       </div>
                     </dd>
@@ -147,6 +147,44 @@
                     <dt class="col-sm-4">Overridden Merchant Name</dt>
                     <dd class="col-sm-8">
                       <input type="text" id="merchantName" class="form-control" value=""/>
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Decoupled Max Time</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="threeDSRequestorDecMaxTime" class="form-control"
+                             value=""/>
+                    </dd>
+
+                    <dt class="col-sm-4">3DS Requestor Decoupled Request Indicator</dt>
+                    <dd class="col-sm-8">
+                      <select id="threeDSRequestorDecReqInd" class="form-control">
+                        <option value="" selected></option>
+                        <option value="Y">Decoupled Authentication is supported and preferred (Y)
+                        </option>
+                        <option value="N">Do not use Decoupled Authentication (N)</option>
+                      </select>
+                    </dd>
+
+                    <dt class="col-sm-4">Whitelist Status</dt>
+                    <dd class="col-sm-8">
+                      <select id="whiteListStatus" class="form-control">
+                        <option value="" selected></option>
+                        <option value="Y">3DS Requestor is whitelisted by cardholder (Y)</option>
+                        <option value="N">3DS Requestor is not whitelisted by cardholder (N)
+                        </option>
+                        <option value="E">Not eligible as determined by issuer (E)</option>
+                        <option value="P">Pending confirmation by cardholder (P)</option>
+                        <option value="R">Cardholder rejected (R)</option>
+                        <option value="U">Whitelist status unknown, unavailable, or does not apply
+                          (U)
+                        </option>
+                      </select>
+                    </dd>
+
+                    <dt class="col-sm-4">Whitelist Status Source</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="whiteListStatusSource" class="form-control"
+                             value=""/>
                     </dd>
                   </dl>
                 </div>
@@ -215,8 +253,11 @@
 
   function goApiV2() {
     var sessionData = genSessionData();
-    sessionData.authData.messageCategory = "npa";
-
+    sessionData.authData.messageCategory = $("input[name=messageCategoryForm]:checked").val();
+    var messageVersion = $("input[name=messageVersionForm]:checked").val();
+    if (messageVersion) {
+      sessionData.authData.messageVersion = messageVersion;
+    }
     sessionStorage.setItem("sessionData", JSON.stringify(sessionData));
 
     window.location.href = "/v2/process";
@@ -275,6 +316,25 @@
     var merchantName = $('#merchantName').val();
     if (merchantName) {
       authData.merchantName = merchantName;
+    }
+    var threeDSRequestorDecMaxTime = $('#threeDSRequestorDecMaxTime').val();
+    if (threeDSRequestorDecMaxTime) {
+      authData.threeDSRequestorDecMaxTime = threeDSRequestorDecMaxTime;
+    }
+
+    var threeDSRequestorDecReqInd = $('#threeDSRequestorDecReqInd').val();
+    if (threeDSRequestorDecReqInd) {
+      authData.threeDSRequestorDecReqInd = threeDSRequestorDecReqInd;
+    }
+
+    var whiteListStatus = $('#whiteListStatus').val();
+    if (whiteListStatus) {
+      authData.whiteListStatus = whiteListStatus;
+    }
+
+    var whiteListStatusSource = $('#whiteListStatusSource').val();
+    if (whiteListStatusSource) {
+      authData.whiteListStatusSource = whiteListStatusSource;
     }
 
     //Cardholder Information

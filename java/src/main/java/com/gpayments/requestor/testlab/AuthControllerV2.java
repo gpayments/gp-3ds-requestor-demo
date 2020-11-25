@@ -18,38 +18,28 @@
 
 package com.gpayments.requestor.testlab;
 
-import com.gpayments.requestor.testlab.config.Config;
+import com.gpayments.requestor.testlab.dto.AuthDataNoScriptDTO;
 import com.gpayments.requestor.testlab.dto.Message;
-import java.util.UUID;
 import javax.servlet.http.HttpSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-@RestController
+@Controller
 @RequestMapping("/")
 public class AuthControllerV2 {
 
-  private static final Logger logger = LoggerFactory.getLogger(AuthControllerV2.class);
-  private final RestTemplate restTemplate;
-  private final Config config;
+  private final AuthServiceV2 authServiceV2;
 
   @Autowired
-  public AuthControllerV2(
-      RestTemplate restTemplate,
-      Config config) {
-    this.restTemplate = restTemplate;
-    this.config = config;
+  public AuthControllerV2(AuthServiceV2 authServiceV2) {
+    this.authServiceV2 = authServiceV2;
   }
 
   /**
@@ -57,45 +47,11 @@ public class AuthControllerV2 {
    * ActiveServer to Initialise Authentication
    */
   @PostMapping("/v2/auth/init")
+  @ResponseBody
   public Message initAuth(
       @RequestParam(value = "trans-type", required = false) String transType,
       @RequestBody Message request, HttpSession session) {
-
-    //Generate requestor trans ID
-    String transId = UUID.randomUUID().toString();
-    request.put("threeDSRequestorTransID", transId);
-    //Fill the event call back url with requestor url + /3ds-notify
-    String callBackUrl = config.getBaseUrl() + "/3ds-notify";
-    request.put("eventCallbackUrl", callBackUrl);
-
-    //ActiveServer url for Initialise Authentication
-    String initAuthUrl = config.getAsAuthUrl() + "/api/v2/auth/brw/init";
-
-    //Add parameter trans-type=prod in the initAuthUrl to use prod DS, otherwise use testlab DS
-    //For example, in this demo, the initAuthUrl for transactions with prod DS is https://api.as.testlab.3dsecure.cloud:7443/api/v2/auth/brw/init?trans-type=prod
-    //For more details, refer to: https://docs.activeserver.cloud
-    if ("prod".equals(transType)) {
-      initAuthUrl = initAuthUrl + "?trans-type=prod";
-    }
-
-    logger.info("initAuthRequest on url: {}, body: \n{}", initAuthUrl, request);
-
-    //Send data to ActiveServer to Initialise authentication (Step 3)
-    //Get the response data from ActiveServer (Step 4)
-    Message response =
-        sendRequest(initAuthUrl, request, HttpMethod.POST);
-    logger.info("initAuthResponseBRW: \n{}", response);
-
-    if (response != null) {
-      //save initAuth response into session storage
-      session.setAttribute((String) response.get("threeDSServerTransID"),
-          response);
-    } else {
-      logger.error("Error in initAuth response");
-    }
-
-    //Return data to 3ds-web-adapter (Step 5)
-    return response;
+    return authServiceV2.initAuth(transType, request, session);
   }
 
   /**
@@ -103,150 +59,86 @@ public class AuthControllerV2 {
    * ActiveServer to Execute Authentication
    */
   @PostMapping("/v2/auth")
+  @ResponseBody
   public Message auth(@RequestBody Message request, HttpSession session) {
-    //get authUrl from session storage
-    Message initAuthResponse = (Message) session
-        .getAttribute((String) request.get("threeDSServerTransID"));
-    String authUrl = (String) initAuthResponse.get("authUrl");
-    logger.info("requesting BRW Auth API {}, body: \n{}", authUrl, request);
-
-    //Send data to ActiveServer to Execute Authentication (Step 10)
-    //Get the response data from ActiveServer (Step 12)
-    Message response =
-        sendRequest(authUrl, request, HttpMethod.POST);
-    logger.info("authResponseBRW: \n{}", response);
-
-    //Return data to 3ds-web-adapter (Step 13)
-    return response;
+    return authServiceV2.auth(request, session);
   }
 
   @PostMapping("/v2/auth/challenge/status")
+  @ResponseBody
   public Message challengeStatus(@RequestBody Message request) {
-    String challengeStatusUrl = config.getAsAuthUrl() + "/api/v2/auth/challenge/status";
-    logger.info("request challenge status API {}, body: \n{}", challengeStatusUrl, request);
-
-    Message response =
-        sendRequest(challengeStatusUrl, request, HttpMethod.POST);
-    logger.info("challengeStatus response: \n{}", response);
-
-    return response;
+    return authServiceV2.challengeStatus(request);
   }
 
   /**
    * Receives the Request for authentication result request (Step 15(F) and Step 20(C)) Send data to
    * ActiveServer to Retrieve Authentication Results
    */
-  @GetMapping("/v2/auth/result")
-  public Message result(@RequestParam("txid") String serverTransId) {
-    //ActiveServer url for Retrieve Results
-    String resultUrl = config.getAsAuthUrl() +
-        "/api/v2/auth/brw/result?threeDSServerTransID=" +
-        serverTransId;
-
-    //Get authentication result from ActiveServer (Step 16(F) and Step 21(C))
-    Message response =
-        sendRequest(resultUrl, null, HttpMethod.GET);
-    logger.info("authResponse: \n{}", response);
-
-    //Show authentication results on result.html (Step 17(F) and Step 22(C))
-    return response;
+  @ResponseBody
+  @GetMapping("/v2/auth/brw/result")
+  public Message resultBRW(@RequestParam("txid") String serverTransId) {
+    return authServiceV2.getBRWResult(serverTransId);
   }
 
-
   @PostMapping("/v2/auth/3ri")
-  public Message threeRITest(@RequestParam(value = "trans-type", required = false) String transType,
+  @ResponseBody
+  public Message threeRI(@RequestParam(value = "trans-type", required = false) String transType,
       @RequestBody Message request) {
-    //generate requestor trans ID
-    String transId = UUID.randomUUID().toString();
-    request.put("threeDSRequestorTransID", transId);
+    return authServiceV2.threeRI(transType, request);
+  }
 
-    String threeRIUrl = config.getAsAuthUrl() + "/api/v2/auth/3ri";
-
-    //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
-    if ("prod".equals(transType)) {
-      threeRIUrl = threeRIUrl + "?trans-type=prod";
-    }
-
-    logger.info("authRequest3RI on url: {}, body: \n{}", threeRIUrl, request);
-
-    Message response =
-        sendRequest(threeRIUrl, request, HttpMethod.POST);
-    logger.info("authResponse3RI: \n{}", response);
-    return response;
+  @GetMapping("/v2/auth/3ri/result")
+  public Message result3RI(@RequestParam("txid") String serverTransId) {
+    return authServiceV2.get3RIResult(serverTransId);
   }
 
   @PostMapping("/v2/auth/app")
+  @ResponseBody
   public Message app(@RequestParam(value = "trans-type", required = false) String transType,
       @RequestBody Message request) {
-
-    //generate requestor trans ID
-    String transId = UUID.randomUUID().toString();
-    request.put("threeDSRequestorTransID", transId);
-
-    String appAuthUrl = config.getAsAuthUrl() + "/api/v2/auth/app";
-
-    //Add parameter trans-type=prod in the appAuthUrl to use prod DS, otherwise use testlab DS
-    //For more details, refer to: https://docs.activeserver.cloud
-    if ("prod".equals(transType)) {
-      appAuthUrl = appAuthUrl + "?trans-type=prod";
-    }
-
-    logger.info("appAuthRequest on url: {}, body: \n{}", appAuthUrl, request);
-
-    Message response =
-        sendRequest(appAuthUrl, request, HttpMethod.POST);
-    logger.info("appAuthResponse: \n{}", response);
-    return response;
+    return authServiceV2.app(transType, request);
   }
 
   @PostMapping("/v2/auth/enrol")
-  public Message enrolTest(@RequestParam(value = "trans-type", required = false) String transType,
+  @ResponseBody
+  public Message enrol(@RequestParam(value = "trans-type", required = false) String transType,
       @RequestBody Message request) {
-
-    String enrolUrl = config.getAsAuthUrl() + "/api/v2/auth/enrol";
-
-    //Add parameter trans-type=prod to use prod DS, otherwise use testlab DS
-    if ("prod".equals(transType)) {
-      enrolUrl = enrolUrl + "?trans-type=prod";
-    }
-
-    logger.info("enrol on url: {}, body: \n{}", enrolUrl, request);
-
-    Message response =
-        sendRequest(enrolUrl, request, HttpMethod.POST);
-    logger.info("enrolResponse: \n{}", response);
-    return response;
+    return authServiceV2.enrol(transType, request);
   }
+
 
   /**
-   * Send request to ActiveServer, if groupAuth is enabled, workout the required header.
+   * Receives the initialise authentication request from a no-javascript environment.
    */
-  private Message sendRequest(String url, Message request, HttpMethod method) {
-
-    HttpEntity<Message> req;
-    HttpHeaders headers = null;
-
-    if (config.isGroupAuth()) {
-      //the certificate is for groupAuth, work out the header.
-      headers = new HttpHeaders();
-      headers.add("AS-Merchant-Token", config.getMerchantToken());
-    }
-
-    switch (method) {
-      case POST:
-        req = new HttpEntity<>(request, headers);
-        return restTemplate.postForObject(url, req, Message.class);
-      case GET:
-        if (headers == null) {
-          return restTemplate.getForObject(url, Message.class);
-        } else {
-          req = new HttpEntity<>(headers);
-          return restTemplate.exchange(url, HttpMethod.GET, req, Message.class).getBody();
-        }
-      default:
-        return null;
-    }
-
-
+  @PostMapping("/v2/auth/init/noscript")
+  public String initAuthNoScript(
+      @RequestParam(value = "trans-type", required = false) String transType,
+      AuthDataNoScriptDTO authData, Model model, HttpSession session) {
+    return authServiceV2.initAuthNoScript(transType, authData, model, session);
   }
+
+  @GetMapping("/v2/auth/noscript")
+  public String authNoScript(
+      @RequestParam("transId") String transId,
+      @RequestParam("param") String param,
+      Model model,
+      HttpSession session) {
+    return authServiceV2.authNoScript(transId, param, model, session);
+  }
+
+
+  @GetMapping("/v2/auth/result/noscript/poll")
+  public String pollResultNoScript(
+      @RequestParam("transId") String transId,
+      Model model,
+      HttpSession session) {
+    return authServiceV2.pollResultNoScript(transId, model, session);
+  }
+
+  @GetMapping("/v2/auth/brw/result/noscript")
+  public String resultNoScript(
+      @RequestParam("transId") String transId, Model model, HttpSession session) {
+    return authServiceV2.resultNoScript(transId, model, session);
+  }
+
 }
