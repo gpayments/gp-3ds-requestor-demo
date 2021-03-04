@@ -8,6 +8,10 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.1 (compatible with ActiveServer v2.0.1)
+* Added sample code for the challenge page time out scenario
+* Bug fix for dotnet requestor code related to non-javascript support
+
 ### Version 2.0 (compatible with ActiveServer v2.0.0)
 * Addded support for **EMV message version 2.2.0**
 	* Added a Message Version selection field on the test pages to select between EMV v2.1.0 and v2.2.0

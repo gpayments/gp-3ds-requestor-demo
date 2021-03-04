@@ -57,6 +57,11 @@ var _authData = {};
 var _options = {};
 
 /**
+ * challengeResultRetrieved flag to indicate if the challenge authentication result has been retrieved.
+ */
+var challengeResultReady = false;
+
+/**
  * Perform Browser-based authentication
  * @param authData
  * @param container: iframe container
@@ -201,10 +206,10 @@ function _doPolling(url, authReadyCallback) {
     }
 
     if (data.event === "AuthResultNotReady") {
-      console.log("AuthResultNotReady, call it again after 1 second");
+      console.log("AuthResultNotReady, retry in 2 seconds");
       setTimeout(function () {
         _doPolling(url, authReadyCallback)
-      }, 1000);
+      }, 2000);
     } else if (data.event === "AuthResultReady") {
       console.log('AuthResultReady');
       authReadyCallback(serverTransId, _callbackFn);
@@ -290,8 +295,7 @@ function _onDoAuthSuccess(data) {
           _callbackFn("onAuthResult", returnData);
         }
       } else {
-        data.challengeUrl ? startChallenge(data.challengeUrl) : _onError(
-            {"Error": "Invalid Challenge Callback Url"});
+        startChallenge(data);
       }
 
     } else if (data.transStatus === "D") {
@@ -306,17 +310,30 @@ function _onDoAuthSuccess(data) {
 
 /**
  * Setup iframe for challenge flow
- * @param url is the challenge url returned from 3DS Server
  */
-function startChallenge(url) {
+function startChallenge(data) {
 
-  _callbackFn("onChallengeStart");
-  //create the iframe
-  $('<iframe src="' + url
-      + '" width="100%" height="100%" style="border:0" id="' + "cha_" + iframeId
-      + '"></iframe>')
-  .appendTo(iframeContainer);
+  if (data.challengeUrl) {
+    challengeResultReady = false;
+    _callbackFn("onChallengeStart");
+    //create the iframe
+    $('<iframe src="' + data.challengeUrl
+        + '" width="100%" height="100%" style="border:0" id="' + "cha_"
+        + iframeId
+        + '"></iframe>')
+    .appendTo(iframeContainer);
 
+    if (data.resultMonUrl) {
+      console.log("Start polling for challenge result");
+      _doPolling(data.resultMonUrl, getChallengeAuthResult);
+    } else {
+      console.log(
+          "No resultMonUrl provided, challenge timout monitoring is skipped.");
+    }
+
+  } else {
+    _onError({"Error": "Invalid Challenge Callback Url"});
+  }
 }
 
 function _onCancelSuccess(data) {
@@ -356,7 +373,28 @@ function _cancelMessage() {
  **/
 function _onAuthResult() {
   console.log('authentication result is ready: ');
-  getBrwResult(serverTransId, _callbackFn);
+  getChallengeAuthResult(serverTransId, _callbackFn);
+}
+
+/**
+ * Method used to get challenge authentication result
+ * @param threeDSServerTransID
+ * @param callbackFn
+ */
+function getChallengeAuthResult(threeDSServerTransID, callbackFn) {
+
+  if (!challengeResultReady) {
+    //remove challenge iframe if exist
+    if (document.getElementById("cha_" + iframeId)) {
+      console.log("Remove challenge iframe");
+      $("#cha_" + iframeId).remove();
+    }
+    challengeResultReady = true;
+    getBrwResult(threeDSServerTransID, callbackFn);
+  } else {
+    console.log("Auth result has been retrieved.");
+  }
+
 }
 
 /**

@@ -187,6 +187,10 @@
     <Content Include="Views\Main\error.html" />
     <Content Include="Views\Main\index.html" />
     <Content Include="Views\Main\notify_3ds_events.html" />
+    <Content Include="Views\Main\no_script.html" />
+    <Content Include="Views\Main\no_script_poll_result.html" />
+    <Content Include="Views\Main\no_script_process.html" />
+    <Content Include="Views\Main\no_script_results.html" />
     <Content Include="Views\Main\v1\process.html" />
     <Content Include="Views\Main\v1\result.html" />
     <Content Include="Views\Main\v2\process.html" />

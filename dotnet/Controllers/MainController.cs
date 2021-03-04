@@ -142,9 +142,10 @@ namespace GPayments.Requestor.TestLab.Controllers
         * Receives the initialise authentication request from a no-javascript environment.
         */
         [HttpPost, Route("v2/auth/init/noscript")]
-        public ActionResult initAuthNoScript([System.Web.Http.FromBody] AuthDataNoScriptDTO authData, [System.Web.Http.FromUri(Name = "trans-type")] string transType = null)
+        public ActionResult initAuthNoScript([System.Web.Http.FromBody] AuthDataNoScriptDTO authData)
         {
             Model model = new Model();
+            string transType = Request.Params["trans-type"];
             string view = authServiceV2.initAuthNoScript(transType, authData, model);
             return View(view, model);
         }
