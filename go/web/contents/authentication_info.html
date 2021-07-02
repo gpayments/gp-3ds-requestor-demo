@@ -31,15 +31,18 @@
     </dd>
     <dt class="col-sm-4">3DS Requestor Authentication Method</dt>
     <dd class="col-sm-8">
-      <select id="threeDSReqAuthMethod" class="form-control">
-        <option value="" selected></option>
-        <option value="01">No authentication occurred (01)</option>
-        <option value="02">Use 3DS Requestor’s own credentials (02)</option>
-        <option value="03">Use federated ID (03)</option>
-        <option value="04">Use issuer credentials (04)</option>
-        <option value="05">Use third-party authentication (05)</option>
-        <option value="06">Use FIDO Authenticator (06)</option>
-      </select>
+      <input type="text" id="threeDSReqAuthMethod" list="threeDSReqAuthMethodList"
+             class="form-control" value=""/>
+      <datalist id="threeDSReqAuthMethodList">
+        <option value="01">No 3DS Requestor authentication occurred (01)</option>
+        <option value="02">Login using 3DS Requestor’s own credentials (02)</option>
+        <option value="03">Login using federated ID (03)</option>
+        <option value="04">Login using issuer credentials (04)</option>
+        <option value="05">Login using third-party authentication (05)</option>
+        <option value="06">Login using FIDO Authenticator (06)</option>
+        <option value="07">Login using FIDO Authenticator (FIDO assurance data signed) (07)</option>
+        <option value="08">SRC Assurance Data (08)</option>
+      </datalist>
     </dd>
     <dt class="col-sm-4">3DS Requestor Authentication Timestamp</dt>
     <dd class="col-sm-8">

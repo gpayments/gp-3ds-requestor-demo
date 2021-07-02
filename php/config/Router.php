@@ -1,4 +1,5 @@
 <?php session_start();
+
 /**
  *  Copyright (C) GPayments Pty Ltd - All Rights Reserved
  *  Copying of this file, via any medium, is subject to the
@@ -16,13 +17,12 @@
  *
  *
  */
-
 class Router
 {
     private $mainController;
     private $authControllerV1;
     private $authControllerV2;
-
+    private $threeds1Controller;
 
     function __construct($config)
     {
@@ -31,6 +31,7 @@ class Router
         $this->mainController = new MainController($config, $restTemplate, $templateResolver);
         $this->authControllerV1 = new AuthControllerV1($config, $restTemplate);
         $this->authControllerV2 = new AuthControllerV2($config, $restTemplate, $templateResolver);
+        $this->threeds1Controller = new MainController3DS1($config, $restTemplate, $templateResolver);
     }
 
     public function route($path)
@@ -78,6 +79,14 @@ class Router
                 $this->authControllerV2->resultNoScript();
             } else if ($path === "/v2/auth/result/noscript/poll") {
                 $this->authControllerV2->pollResult();
+            }
+        } else if (startsWith($path, '/3ds1')) {
+            if ($path === "/3ds1/auth") {
+                $this->threeds1Controller->threeds1();
+            } else if ($path === "/3ds1/result") {
+                $this->threeds1Controller->resultPage();
+            } else {
+                $this->threeds1Controller->paymentPage();
             }
         } else {
             if (empty($path) || $path === "/") {

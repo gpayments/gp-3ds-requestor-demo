@@ -1,0 +1,193 @@
+<!--
+  ~ * Copyright (C) GPayments Pty Ltd - All Rights Reserved
+  ~ * Copying of this file, via any medium, is subject to the
+  ~ * ActiveServer End User License Agreement (EULA)
+  ~ *
+  ~ * Proprietary code for use in conjunction with GPayments products only
+  ~ *
+  ~ * Unless required by applicable law or agreed to in writing, software
+  ~ * distributed under the License is distributed on an "AS IS" BASIS,
+  ~ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ * See the License for the specific language governing permissions and
+  ~ * limitations under the License.
+  ~ *
+  ~ * Written by GPayments <techsupport@gpayments.com>, 2020
+  ~
+  ~
+  -->
+
+<!DOCTYPE html>
+<head>
+  <meta charset="UTF-8"/>
+  <title>3DS1 Authentication</title>
+  <link rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous">
+  <link rel="stylesheet" href="/css/style.css"/>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css"
+        integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ"
+        crossorigin="anonymous">
+</head>
+<body>
+
+{{>contents/nav_bar}}
+
+<form class="container" method="post" action="/3ds1" enctype="application/x-www-form-urlencoded"
+      id="authForm">
+  <div class="row h-100 card-row">
+    <div class="col-lg-9">
+
+      <div class="card">
+        <div class="card-header">
+          <ul class="nav nav-tabs card-header-tabs" id="myTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="basicInfoTab" data-toggle="tab" href="#basicInfo"
+                 role="tab"
+                 aria-controls="basicInfo" aria-selected="true">Transaction Info</a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card-body">
+          <div class="tab-content" id="myTabContent">
+            <div class="tab-pane fade show active" id="basicInfo" role="tabpanel"
+                 aria-labelledby="basicInfoTab">
+              <div id="required-info-div">
+                <div>
+                  <br>
+                  <h3 class="mb-3">3DS1 Authentication Request</h3>
+                  <h6 class="mb-3">{{ authUrl }}</h6>
+                  <h6 class="mb-3"><span class="badge badge-warning">AS Saas only</span></h6>
+                  <hr>
+                  <dl class="row">
+
+
+                    <dt class="col-sm-4">Account Number <span class="required">*</span></dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="acctNumber" class="form-control"
+                             value="4123451339561200"
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Merchant Name</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="merchantName" class="form-control"
+                             value=""
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Purchase Amount</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="purchaseAmount" class="form-control"
+                             value="100.54"
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Currency</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="purchaseCurrency" class="form-control"
+                             value="840"
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Purchase Description</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="purchaseDesc" class="form-control"
+                             value="Blue shirt"
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Card Expiry Date (YYMM)</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="cardExpiryDate" class="form-control"
+                             value="2210"
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Recurring Frequency</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="recurringFrequency" class="form-control"
+                             value=""
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Recurring End Date (YYYYMMDD)</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" name="recurringExpiry" class="form-control"
+                             value=""
+                      />
+                    </dd>
+
+                    <input type="hidden" name="callbackUrl" value="{{ callbackUrl }}"/>
+                  </dl>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!--Action Button-->
+    <div class="col-lg-3 mb-4">
+      <ul class="list-group mb-3">
+        <div>
+          <div class="btn-group btn-block" id="do3DS">
+            <button type="button" class="btn btn-primary btn-lg" id="btnAuth">Authenticate
+            </button>
+
+          </div>
+        </div>
+      </ul>
+    </div>
+  </div>
+
+</form>
+
+{{>contents/deps}}
+
+
+<script src="/js/v2/3ds-web-adapter.js"></script>
+<script>
+
+  function handleResponse(response) {
+    //use the challenge url returned from the response
+    if (response.errorCode) {
+      console.error("error response", _onError);
+
+      alert("auth request returns error: \n\n" + JSON.stringify(response))
+    } else {
+      console.log("response:", response)
+      window.location.href = response.challengeUrl;
+    }
+  }
+
+  function handleError(response) {
+    console.error("error", response);
+    alert("auth request returns error: \n\n" + JSON.stringify(response))
+  }
+
+  $("#btnAuth").click(function () {
+
+    var authData = objectifyForm($("#authForm").serializeArray());
+    console.log(authData);
+    doPost("/3ds1/auth", authData, handleResponse, handleError);
+
+  })
+
+  function objectifyForm(formArray) {
+    //serialize data function
+    var returnArray = {};
+    for (var i = 0; i < formArray.length; i++) {
+      returnArray[formArray[i]['name']] = formArray[i]['value'];
+    }
+    return returnArray;
+  }
+
+</script>
+
+
+</body>
+</html>

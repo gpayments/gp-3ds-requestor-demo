@@ -89,14 +89,21 @@
 
                     <dt class="col-sm-4">3RI Indicator <span class="required">*</span></dt>
                     <dd class="col-sm-8">
-                      <select id="threeRIInd" class="form-control">
-                        <option value=""></option>
-                        <option value="01" selected>Recurring transaction (01)</option>
+                      <input type="text" id="threeRIInd" list="threeRIIndList" class="form-control"
+                             value="01"/>
+                      <datalist id="threeRIIndList">
+                        <option value="01">Recurring transaction (01)</option>
                         <option value="02">Instalment transaction (02)</option>
                         <option value="03">Add card (03)</option>
                         <option value="04">Maintain card information (04)</option>
                         <option value="05">Account verification (05)</option>
-                      </select>
+                        <option value="06">Split/delayed shipment (06)</option>
+                        <option value="07">Top-up (07)</option>
+                        <option value="08">Mail Order (08)</option>
+                        <option value="09">Telephone Order (09)</option>
+                        <option value="10">Whitelist status check (10)</option>
+                        <option value="11">Other payment (11)</option>
+                      </datalist>
                     </dd>
 
                     <dt class="col-sm-4">Message Category <span class="required">*</span></dt>
@@ -130,17 +137,59 @@
 
                     <dt class="col-sm-4">Account Type</dt>
                     <dd class="col-sm-8">
-                      <select id="acctType" class="form-control">
-                        <option value=""></option>
+                      <input type="text" id="acctType" list="acctTypeList" class="form-control"
+                             value="03"/>
+                      <datalist id="acctTypeList">
                         <option value="01">Not Applicable (01)</option>
                         <option value="02">Credit (02)</option>
-                        <option value="03" selected>Debit (03)</option>
-                      </select>
+                        <option value="03">Debit (03)</option>
+                      </datalist>
                     </dd>
 
                     <dt class="col-sm-4">Expiry Date (YYMM)</dt>
                     <dd class="col-sm-8">
                       <input type="text" id="cardExpiryDate" class="form-control"
+                             value=""
+                      />
+                    </dd>
+                    <dt class="col-sm-4">Purchase Amount</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="purchaseAmount" class="form-control"
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Purchase Currency</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="purchaseCurrency" class="form-control"
+                      />
+                    </dd>
+                    <dt class="col-sm-4">Purchase Date</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="purchaseDate" class="form-control"
+                             value=""
+                      />
+                    </dd>
+                    <dt class="col-sm-4">Transaction Type</dt>
+                    <dd class="col-sm-8">
+                      <select id="transType" class="form-control">
+                        <option value="" selected></option>
+                        <option value="01">Goods/Service Purchase (01)</option>
+                        <option value="03">Check Acceptance (03)</option>
+                        <option value="10">Account Funding (10)</option>
+                        <option value="11">Quasi-Cash Transaction (11)</option>
+                        <option value="28">Prepaid Activation and Load (28)</option>
+                      </select>
+                    </dd>
+                    <dt class="col-sm-4">Recurring Expiry</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="recurringExpiry" class="form-control"
+                             value=""
+                      />
+                    </dd>
+
+                    <dt class="col-sm-4">Recurring Frequency</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="recurringFrequency" class="form-control"
                              value=""
                       />
                     </dd>
@@ -201,7 +250,7 @@
                 <!--AcctInfo-->
                 {{>contents/acct_info}}
 
-                <hr class="mb-4"/>
+                {{>contents/prior_auth_info}}
                 <!--MerchantRiskIndicator-->
                 {{>contents/merchant_risk_indicator}}
               </div>
@@ -310,6 +359,37 @@
     var priorTransID = $('#priorTransID').val();
     if (priorTransID) {
       authData.priorTransID = priorTransID;
+    }
+
+    var purchaseAmount = $('#purchaseAmount').val();
+    if (purchaseAmount) {
+      //use Math.round() to avoid problems of javascript processing decimal math
+      authData.purchaseAmount = Math.round(purchaseAmount * 100); //cent to dollar
+    }
+
+    var purchaseCurrency = $('#purchaseCurrency').val();
+    if (purchaseCurrency) {
+      authData.purchaseCurrency = purchaseCurrency;
+    }
+
+    var purchaseDate = $('#purchaseDate').val();
+    if (purchaseDate) {
+      authData.purchaseDate = purchaseDate;
+    }
+
+    var recurringExpiry = $('#recurringExpiry').val();
+    if (recurringExpiry) {
+      authData.recurringExpiry = recurringExpiry;
+    }
+
+    var recurringFrequency = $('#recurringFrequency').val();
+    if (recurringFrequency) {
+      authData.recurringFrequency = recurringFrequency;
+    }
+
+    var transType = $('#transType').val();
+    if (transType) {
+      authData.transType = transType;
     }
 
     // load merchantName

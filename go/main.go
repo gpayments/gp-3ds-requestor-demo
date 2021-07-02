@@ -89,6 +89,9 @@ func main() {
 	//Main Controller router
 	mainController(r, config, fp)
 
+	//3ds1 controller router
+	threeDS1Controller(r, config, httpClient, fp)
+
 	//static resources
 	r.Static("/js", "web/js")
 	r.Static("/css", "web/css")
@@ -210,8 +213,17 @@ func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 
 			callbackName = "_onInitAuthTimedOut"
 
+		case "3DSMethodHasError":
+
+      //Event 3DSMethodHasError is only for logging and troubleshooting purpose, this demo
+      //sets the callbackName to be _NA so the frontend won't process it.
+			callbackName = "_NA"
+
 		default:
 
+      // Alternatively, a callbackName like "_NA" can be returned (so the frontend won't recognised it)
+      // to make the callback process more robust and resilient.
+      // callbackName = "_NA"
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid callback type"})
 			return
 

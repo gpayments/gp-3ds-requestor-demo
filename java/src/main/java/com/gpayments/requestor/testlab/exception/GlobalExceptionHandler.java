@@ -20,6 +20,7 @@ package com.gpayments.requestor.testlab.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -33,8 +34,10 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(HttpStatusCodeException.class)
   @ResponseBody
-  public String processError(HttpStatusCodeException ex) {
-    logger.error("failed, {}, {}", ex.getStatusCode(), ex.getResponseBodyAsString());
-    return ex.getResponseBodyAsString();
+  public ResponseEntity<String> processError(HttpStatusCodeException ex) {
+    logger.error(
+        String.format("failed, %d, %s", ex.getStatusCode().value(), ex.getResponseBodyAsString()),
+        ex);
+    return ResponseEntity.status(ex.getStatusCode()).body(ex.getResponseBodyAsString());
   }
 }

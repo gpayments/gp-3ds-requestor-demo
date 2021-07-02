@@ -54,14 +54,14 @@ public class RestClientConfig {
       KeyStoreException, KeyManagementException {
 
     final String keyStorePassword =
-        !StringUtils.isEmpty(config.getCertFilePassword()) ? config.getCertFilePassword()
+        StringUtils.hasLength(config.getCertFilePassword()) ? config.getCertFilePassword()
             : DEFAULT_CERT_FILE_PASSWORD;
     final char[] chars = keyStorePassword.toCharArray();
     SSLContext sslContext =
         SSLContextBuilder.create()
             .loadKeyMaterial(
                 new File(config.getCertFileName()), chars, chars)
-            .loadTrustMaterial(getCAKeystore(CA_CERTS_FILE_NAME), new TrustSelfSignedStrategy())
+            .loadTrustMaterial(getCAKeystore(), new TrustSelfSignedStrategy())
             .build();
 
     CloseableHttpClient client = HttpClients.custom().setSSLContext(sslContext).build();
@@ -71,13 +71,13 @@ public class RestClientConfig {
     return new RestTemplate(httpRequestFactory);
   }
 
-  private KeyStore getCAKeystore(String fileName)
+  private KeyStore getCAKeystore()
       throws CertificateException, IOException, KeyStoreException, NoSuchAlgorithmException {
 
     CertificateFactory factory = CertificateFactory.getInstance("X.509");
 
     Collection<? extends Certificate> certificates =
-        factory.generateCertificates(new ClassPathResource(fileName).getInputStream());
+        factory.generateCertificates(new ClassPathResource(CA_CERTS_FILE_NAME).getInputStream());
 
     KeyStore keystore = KeyStore.getInstance("JKS");
     keystore.load(null);

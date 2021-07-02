@@ -125,6 +125,11 @@ class MainController
 
         } else if ($callbackType === "AuthResultReady") {
             Utils::_redirect("/v2/auth/brw/result/noscript?transId=" . $requestorTransId);
+        } else if ($callbackType === "3DSMethodHasError") {
+          //Event 3DSMethodHasError is only for logging and troubleshooting purpose, this demo
+          //just log and exit current notify process.
+            echo "3DSMethodHasError callback is received";
+            exit;
         } else {
             echo "invalid callback type";
             exit;

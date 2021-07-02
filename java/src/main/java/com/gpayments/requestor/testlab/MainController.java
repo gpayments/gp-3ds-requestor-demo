@@ -140,7 +140,16 @@ public class MainController {
 
       callbackName = "_onInitAuthTimedOut";
 
+    } else if ("3DSMethodHasError".equals(callbackType)) {
+
+      //Event 3DSMethodHasError is only for logging and troubleshooting purpose, this demo
+      //sets the callbackName to be _NA so the frontend won't process it.
+      callbackName = "_NA";
+
     } else {
+      // Alternatively, a callbackName like "_NA" can be returned (so the frontend won't recognised it)
+      // to make the callback process more robust and resilient.
+      // callbackName = "_NA"
       throw new IllegalArgumentException("invalid callback type");
     }
 

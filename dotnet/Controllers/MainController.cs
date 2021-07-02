@@ -121,7 +121,14 @@ namespace GPayments.Requestor.TestLab.Controllers
                 callbackName = "_onAuthResult";
             else if ("InitAuthTimedOut".Equals(callbackType))
                 callbackName = "_onInitAuthTimedOut";
+            else if ("3DSMethodHasError".Equals(callbackType))
+               //Event 3DSMethodHasError is only for logging and troubleshooting purpose, this demo
+               //sets the callbackName to be _NA so the frontend won't process it.
+                callbackName = "_NA";
             else
+                // Alternatively, a callbackName like "_NA" can be returned (so the frontend won't recognised it)
+                // to make the callback process more robust and resilient.
+                // callbackName = "_NA"
                 throw new ArgumentException("invalid callback type");
 
             dynamic model = new ExpandoObject();
@@ -207,6 +214,31 @@ namespace GPayments.Requestor.TestLab.Controllers
             {
                 throw new ArgumentException("invalid notifyCallback");
             }
+        }
+
+        [HttpGet, Route("3ds1")]
+        public ActionResult paymentPage()
+        {
+            dynamic model = new ExpandoObject();
+            model.authUrl = Config.AsAuthUrl;
+            model.callbackUrl = Config.BaseUrl + "/3ds1/result";
+
+            logger.Info("3ds1 auth page called");
+            return View("3ds1/auth", model);
+        }
+
+        [HttpPost, Route("3ds1/result")]
+        public ActionResult resultPage()
+        {
+            var body = Request.Form;
+            logger.Info(string.Format("received result: {0}", body));
+
+            dynamic model = new ExpandoObject();
+            model.cavv = body["cavv"];
+            model.cavvAlgo = body["cavvAlgo"];
+            model.eci = body["eci"];
+            model.threeDSRequestorTransID = body["threeDSRequestorTransID"];
+            return View("3ds1/result", model);
         }
     }
 }

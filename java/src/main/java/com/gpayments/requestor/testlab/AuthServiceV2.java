@@ -37,6 +37,9 @@ import org.springframework.web.client.RestTemplate;
 public class AuthServiceV2 {
 
   private static final Logger logger = LoggerFactory.getLogger(AuthServiceV2.class);
+
+  public static final String AS_MERCHANT_TOKEN_HEADER = "AS-Merchant-Token";
+
   private static final String THREE_DS_REQUESTOR_TRANS_ID = "threeDSRequestorTransID";
   private static final String THREE_DS_SERVER_TRANS_ID = "threeDSServerTransID";
   private static final String INIT_AUTH_REQUEST = "initAuthRequest";
@@ -251,7 +254,7 @@ public class AuthServiceV2 {
     if (config.isGroupAuth()) {
       //the certificate is for groupAuth, work out the header.
       headers = new HttpHeaders();
-      headers.add("AS-Merchant-Token", config.getMerchantToken());
+      headers.add(AS_MERCHANT_TOKEN_HEADER, config.getMerchantToken());
     }
 
     switch (method) {

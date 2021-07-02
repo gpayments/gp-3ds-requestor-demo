@@ -137,6 +137,8 @@
     <Compile Include="Controllers\AuthServiceV2.cs" />
     <Compile Include="Controllers\AuthV2Controller.cs" />
     <Compile Include="Controllers\MainController.cs" />
+    <Compile Include="Controllers\Threeds1\Main3DS1Controller.cs" />
+    <Compile Include="Controllers\Threeds1\ThreeDS1Service.cs" />
     <Compile Include="exception\GlobalExceptionHandler.cs" />
     <Compile Include="Helpers\Config.cs" />
     <Compile Include="Models\dto\AuthDataNoScriptDTO.cs" />
@@ -144,6 +146,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\dto\Threeds1\ThreeDS1AuthReq.cs" />
+    <Compile Include="Models\dto\Threeds1\ThreeDS1AuthResp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\RestClientHelper.cs" />
   </ItemGroup>
@@ -169,6 +173,9 @@
     <Content Include="js\check-credit-card-type.js" />
     <Content Include="js\common.js" />
     <Content Include="js\test-lab-scenarios.js" />
+    <Content Include="Views\Main\3ds1\auth.html" />
+    <Content Include="Views\Main\3ds1\error.html" />
+    <Content Include="Views\Main\3ds1\result.html" />
     <Content Include="Views\Main\3ri.html" />
     <Content Include="Views\Main\app.html" />
     <Content Include="Views\Main\brw.html" />
