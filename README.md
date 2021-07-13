@@ -8,6 +8,9 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.3 (compatible with ActiveServer v2.0.4)
+* Fixed 3DS1 get result page template not found issue
+
 ### Version 2.2 (compatible with ActiveServer v2.0.4)
 * Added 3DS1 sample code and BRW test pages (SaaS clients only)
 * Added a new callback event, 3DSMethodHasError, to the backend demo code
