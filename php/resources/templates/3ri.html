@@ -169,6 +169,15 @@
                              value=""
                       />
                     </dd>
+
+                    <dt class="col-sm-4">Purchase Instalment Data</dt>
+                    <dd class="col-sm-8">
+                      <input type="text" id="purchaseInstalData" class="form-control"
+                             value=""
+                      />
+                    </dd>
+
+
                     <dt class="col-sm-4">Transaction Type</dt>
                     <dd class="col-sm-8">
                       <select id="transType" class="form-control">
@@ -375,6 +384,11 @@
     var purchaseDate = $('#purchaseDate').val();
     if (purchaseDate) {
       authData.purchaseDate = purchaseDate;
+    }
+
+    var purchaseInstalData = $('#purchaseInstalData').val();
+    if (purchaseInstalData) {
+      authData.purchaseInstalData = purchaseInstalData;
     }
 
     var recurringExpiry = $('#recurringExpiry').val();

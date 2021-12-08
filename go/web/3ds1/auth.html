@@ -179,9 +179,19 @@
 
   function objectifyForm(formArray) {
     //serialize data function
-    var returnArray = {};
-    for (var i = 0; i < formArray.length; i++) {
-      returnArray[formArray[i]['name']] = formArray[i]['value'];
+    let returnArray = {};
+    for (let i = 0; i < formArray.length; i++) {
+      let val = formArray[i]['value']
+      //only add truthy values
+      if (val) {
+        let fieldName = formArray[i]['name'];
+        //for the purchaseAmount, the value must be in the currency's minor unit.
+        //The demo here assumes the currency Exponent is 2
+        if (fieldName === 'purchaseAmount') {
+          val = val * 100
+        }
+        returnArray[fieldName] = val;
+      }
     }
     return returnArray;
   }

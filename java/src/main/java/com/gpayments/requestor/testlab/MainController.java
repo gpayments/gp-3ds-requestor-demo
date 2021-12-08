@@ -40,6 +40,10 @@ public class MainController {
   private static final Logger logger = LoggerFactory.getLogger(MainController.class);
   private final Config config;
 
+  private static final String CALLBACK_URL = "callbackUrl";
+  private static final String SERVER_URL = "serverUrl";
+  private static final String TRANS_ID = "transId";
+
   @Autowired
   public MainController(Config config) {
     this.config = config;
@@ -73,8 +77,8 @@ public class MainController {
   @GetMapping("/brw")
   public String authentication(Model model) {
 
-    model.addAttribute("callbackUrl", config.getBaseUrl());
-    model.addAttribute("serverUrl", config.getAsAuthUrl());
+    model.addAttribute(CALLBACK_URL, config.getBaseUrl());
+    model.addAttribute(SERVER_URL, config.getAsAuthUrl());
 
     return "brw";
   }
@@ -82,8 +86,8 @@ public class MainController {
   @GetMapping("/enrol")
   public String enrol(Model model) {
 
-    model.addAttribute("serverUrl", config.getAsAuthUrl());
-    model.addAttribute("callbackUrl", config.getBaseUrl());
+    model.addAttribute(SERVER_URL, config.getAsAuthUrl());
+    model.addAttribute(CALLBACK_URL, config.getBaseUrl());
 
     return "enrol";
   }
@@ -91,8 +95,8 @@ public class MainController {
   @GetMapping("/3ri")
   public String threeRI(Model model) {
 
-    model.addAttribute("callbackUrl", config.getBaseUrl());
-    model.addAttribute("serverUrl", config.getAsAuthUrl());
+    model.addAttribute(CALLBACK_URL, config.getBaseUrl());
+    model.addAttribute(SERVER_URL, config.getAsAuthUrl());
 
     return "3ri";
   }
@@ -100,8 +104,8 @@ public class MainController {
   @GetMapping("/app")
   public String app(Model model) {
 
-    model.addAttribute("callbackUrl", config.getBaseUrl());
-    model.addAttribute("serverUrl", config.getAsAuthUrl());
+    model.addAttribute(CALLBACK_URL, config.getBaseUrl());
+    model.addAttribute(SERVER_URL, config.getAsAuthUrl());
 
     return "app";
   }
@@ -147,13 +151,16 @@ public class MainController {
       callbackName = "_NA";
 
     } else {
-      // Alternatively, a callbackName like "_NA" can be returned (so the frontend won't recognised it)
+      // When unrecognised event has been received, a callbackName like "_NA" can be returned (so the frontend won't recognise it)
       // to make the callback process more robust and resilient.
-      // callbackName = "_NA"
-      throw new IllegalArgumentException("invalid callback type");
+      // Alternatively, the 3DS Requestor backend implementation may choose to throw an exception to indicate this error
+      // however the frontend must be able to handle the exception so that the checkout page flow won't be interrupted
+      callbackName = "_NA";
+
+
     }
 
-    model.addAttribute("transId", transId);
+    model.addAttribute(TRANS_ID, transId);
     model.addAttribute("callbackName", callbackName);
     model.addAttribute("callbackParam", param);
 
@@ -179,7 +186,7 @@ public class MainController {
 
       logger.info("{}, continue to do authentication", callbackType);
 
-      ra.addAttribute("transId", transId);
+      ra.addAttribute(TRANS_ID, transId);
       ra.addAttribute("param", param);
       return "redirect:/v2/auth/noscript";
 
@@ -187,7 +194,7 @@ public class MainController {
 
       logger.info("{}, continue to get result", callbackType);
 
-      ra.addAttribute("transId", transId);
+      ra.addAttribute(TRANS_ID, transId);
       return "redirect:/v2/auth/brw/result/noscript";
 
     } else {

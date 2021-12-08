@@ -66,6 +66,9 @@ public class MainController3DS1 {
   public String resultPage(Model model, @RequestBody MultiValueMap<String, String> body) {
     logger.info("received result: {}", body);
 
+    model.addAttribute("errorCode", body.getFirst("errorCode"));
+    model.addAttribute("errorMessage", body.getFirst("errorMessage"));
+    model.addAttribute("txStatus", body.getFirst("txStatus"));
     model.addAttribute("cavv", body.getFirst("cavv"));
     model.addAttribute("cavvAlgo", body.getFirst("cavvAlgo"));
     model.addAttribute("eci", body.getFirst("eci"));

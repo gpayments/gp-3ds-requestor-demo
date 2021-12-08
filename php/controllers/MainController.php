@@ -162,8 +162,11 @@ class MainController
 
             $callbackName = "_onInitAuthTimedOut";
         } else {
-            echo "invalid callback type";
-            exit;
+            // When unrecognised event has been received, a callbackName like "_NA" can be returned (so the frontend won't recognise it)
+            // to make the callback process more robust and resilient.
+            // Alternatively, the 3DS Requestor backend implementation may choose to throw an exception to indicate this error
+            // however the frontend must be able to handle the exception so that the checkout page flow won't be interrupted
+            $callbackName = "_NA";
         }
 
         $model = array();

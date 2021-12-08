@@ -8,6 +8,15 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.4 (compatible with ActiveServer v2.0.6)
+* Exclude empty fields in 3DS1 auth form
+* Auto convert purchaseAmount to minor units without decimal
+* Fix template path to include leading forward slash “/“
+* Add support for new fields in the result notification page in 3DS1
+    * txStatus, errorCode, errorMessage
+* Enhancement of the event handling
+* Disclaimer added to the source code headers
+
 ### Version 2.3 (compatible with ActiveServer v2.0.4)
 * Fixed 3DS1 get result page template not found issue
 
@@ -55,6 +64,10 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 * Added example code for multiple back-end languages, now supported are **Java**, **.NET**, **PHP** and **Go**
 * Enhanced result page to show more information and error handling
 * Updated the front-end web-adapter web pages to have better content rendering structure as well as better event handling
+
+## Disclaimer
+
+While the sample code examples can be used as a guide for integration purposes, it cannot be fully tested for all production environments and therefore clients should adapt it is to ensure it is suitable before using it for production purposes.
 
 ## Legal
 

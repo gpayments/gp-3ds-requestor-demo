@@ -28,6 +28,9 @@ class MainController3DS1
     public function resultPage()
     {
         $model = array();
+        $model["errorCode"] = $_POST["errorCode"];
+        $model["errorMessage"] = $_POST["errorMessage"];
+        $model["txStatus"] = $_POST["txStatus"];
         $model["cavv"] = $_POST["cavv"];
         $model["cavvAlgo"] = $_POST["cavvAlgo"];
         $model["eci"] = $_POST["eci"];

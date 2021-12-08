@@ -23,7 +23,10 @@ func threeDS1Controller(r *gin.Engine, config *Config, httpClient *http.Client, 
 
 	r.POST("/3ds1/result", func(c *gin.Context) {
 		renderPage(gin.H{
-			"cavv":                    c.PostForm("cavv"),
+		  	"errorCode":               c.PostForm("errorCode"),
+		  	"errorMessage":            c.PostForm("errorMessage"),
+		  	"txStatus":                c.PostForm("txStatus"),
+		    "cavv":                    c.PostForm("cavv"),
 			"cavvAlgo":                c.PostForm("cavvAlgo"),
 			"eci":                     c.PostForm("eci"),
 			"threeDSRequestorTransID": c.PostForm("threeDSRequestorTransID"),
