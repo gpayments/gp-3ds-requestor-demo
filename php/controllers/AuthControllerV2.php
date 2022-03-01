@@ -49,6 +49,7 @@ class AuthControllerV2
         $transType = $_GET["trans-type"];
 
         $responseBody = $this->authService->sendInitAuthRequest($transType, $requestData);
+        $responseBody->threeDSRequestorTransID = $requestData->threeDSRequestorTransID;
 
         //Return data to 3ds-web-adapter (Step 5)
         Utils::_returnJson($responseBody);

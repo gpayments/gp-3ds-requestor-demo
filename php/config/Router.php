@@ -23,6 +23,7 @@ class Router
     private $authControllerV1;
     private $authControllerV2;
     private $threeds1Controller;
+    private $browserInfoController;
 
     function __construct($config)
     {
@@ -32,6 +33,7 @@ class Router
         $this->authControllerV1 = new AuthControllerV1($config, $restTemplate);
         $this->authControllerV2 = new AuthControllerV2($config, $restTemplate, $templateResolver);
         $this->threeds1Controller = new MainController3DS1($config, $restTemplate, $templateResolver);
+        $this->browserInfoController = new BrowserInfoController($templateResolver);
     }
 
     public function route($path)
@@ -59,6 +61,8 @@ class Router
                 $this->authControllerV2->initAuth();
             } else if ($path === "/v2/auth/brw/result") {
                 $this->authControllerV2->brwResult();
+            } else if ($path === "/v2/auth/brw/info") {
+                $this->browserInfoController->collectBrwInfo();
             } else if ($path === "/v2/auth") {
                 $this->authControllerV2->auth();
             } else if ($path === "/v2/auth/3ri") {

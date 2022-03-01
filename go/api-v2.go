@@ -82,6 +82,7 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client, fp
 			config:     config,
 			rHandler: func(resp []byte, contentType string, context *gin.Context) error {
 				msg, err := parseMap(resp)
+				msg[ThreeDSRequestorTransId] = message[ThreeDSRequestorTransId]
 				if err != nil {
 					return err
 				}
@@ -96,7 +97,11 @@ func authControllerV2(r *gin.Engine, config *Config, httpClient *http.Client, fp
 				}
 
 				//now return the data
-				context.Data(http.StatusOK, contentType, resp)
+				responseBytes, err := json.Marshal(msg)
+				if err != nil {
+					return err
+				}
+				context.Data(http.StatusOK, contentType, responseBytes)
 				return nil
 			}})
 	})

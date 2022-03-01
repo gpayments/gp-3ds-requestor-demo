@@ -51,6 +51,11 @@
                  aria-controls="cardholderInfo" aria-selected="false">Cardholder</a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" id="browserInfoTab" data-toggle="tab" href="#browserInfo"
+                 role="tab"
+                 aria-controls="browserInfo" aria-selected="false">Browser Info</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" id="additionalInfoTab" data-toggle="tab" href="#additionalInfo"
                  role="tab"
                  aria-controls="additionalInfo" aria-selected="false">Additional Risk</a>
@@ -74,7 +79,7 @@
 
                 <div>
                   <br>
-                  <h3 class="mb-3">Required Field</h3>
+                  <h3 class="mb-3">Required Fields</h3>
                   <hr>
                   <dl class="row">
                     <div class="col-sm-12" id="customizeCollapse">
@@ -150,9 +155,20 @@
                 </div>
                 <div>
                   <br>
-                  <h3 class="mb-3">Additional Field</h3>
+                  <h3 class="mb-3">Additional Fields</h3>
                   <hr>
                   <dl class="row">
+                    <dt class="col-sm-4">Card Scheme Override</dt>
+                    <dd class="col-sm-8">
+                      <select id="cardScheme" class="form-control">
+                        <option value="" selected></option>
+                        <option value="EFTPOS">eftpos</option>
+                        <option value="MIR">Mir</option>
+                        <option value="BCARD">Bcard</option>
+                        <option value="UNIONPAY">UnionPay</option>
+                      </select>
+                    </dd>
+
                     <dt class="col-sm-4">Purchase Amount</dt>
                     <dd class="col-sm-8">
                       <input type="text" id="purchaseAmount" class="form-control"
@@ -314,6 +330,11 @@
               <!--Cardholder Information -->
               {{>contents/cardholder_info}}
             </div>
+            <div class="tab-pane fade" id="browserInfo" role="tabpanel"
+                 aria-labelledby="browserInfoTab">
+              <!--BrowserInfo/RBC Options -->
+              {{>contents/browser_info}}
+            </div>
             <div class="tab-pane fade" id="additionalInfo" role="tabpanel"
                  aria-labelledby="additionalInfoTab">
               <div id="additional-info-div">
@@ -346,8 +367,7 @@
                   </dd>
                   <dt class="col-sm-4">Force Message Version</dt>
                   <dd class="col-sm-8">
-                    <input type="checkbox" id="forceMessageVersion"
-                           onchange="toggleCheckbox(this)">
+                    <input type="checkbox" id="forceMessageVersion">
                   </dd>
                 </dl>
                 <h3 class="mb-3">Merchant Override</h3>
@@ -533,7 +553,7 @@
   function genAuthData() {
     var authData = {};
 
-    //Required field
+    //Required fields
     var acctNumber = $('#acctNumber').val();
     if (acctNumber) {
       authData.acctNumber = acctNumber;
@@ -549,7 +569,12 @@
       authData.merchantId = merchantId;
     }
 
-    //Additional Field
+    //Additional Fields
+    var cardScheme = $('#cardScheme').val();
+    if (cardScheme) {
+      authData.cardScheme = cardScheme;
+    }
+
     var purchaseAmount = $('#purchaseAmount').val();
     if (purchaseAmount) {
       //use Math.round() to avoid problems of javascript processing decimal math
@@ -665,7 +690,29 @@
       authData.whiteListStatusSource = whiteListStatusSource;
     }
 
+    setCollectedBrowserInfo(authData);
+
     return authData;
+  }
+
+  /*
+   Checks to see if RBC will be used. This will parse the client-provided BrowserInfo and set the
+   flag to skip the default BrowserInfo collection (skipAutoBrowserInfoCollect)
+   */
+  function setCollectedBrowserInfo(authData) {
+    if ($("#useRbc").prop("checked")) {
+      let brwInfo;
+      try {
+        brwInfo = JSON.parse($('#brwInfoInput').val());
+      } catch (e) {
+        alert("Error parsing BrowserInfo" + e);
+      }
+      authData.skipAutoBrowserInfoCollect = true;
+      authData.browserInfoCollected = brwInfo;
+    } else {
+      authData.skipAutoBrowserInfoCollect = false;
+      authData.browserInfoCollected = undefined;
+    }
   }
 
   function getTestOptions() {
@@ -685,10 +732,18 @@
   }
 
   function toggleCheckbox(checkbox) {
-    if (checkbox.checked) {
-      $("#cancelReason").prop("disabled", false);
-    } else {
-      $("#cancelReason").prop("disabled", true);
+    if (checkbox.id === 'cancelChallengeCheckbox') {
+      if (checkbox.checked) {
+        $("#cancelReason").prop("disabled", false);
+      } else {
+        $("#cancelReason").prop("disabled", true);
+      }
+    } else if (checkbox.id === 'useRbc') {
+      if (checkbox.checked) {
+        $("#brwInfoInput").prop("disabled", false);
+      } else {
+        $("#brwInfoInput").prop("disabled", true);
+      }
     }
   }
 

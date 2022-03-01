@@ -97,6 +97,10 @@ function brw(authData, container, callbackFn, options, transType) {
     initAuthData.challengeWindowSize = options.challengeWindowSize;
   }
 
+  if (authData.skipAutoBrowserInfoCollect) {
+    initAuthData.skipAutoBrowserInfoCollect = true;
+  }
+
   console.log('init authentication', initAuthData);
 
   //Send data to /auth/init to do Initialise authentication
@@ -230,24 +234,28 @@ function _doPolling(url, authReadyCallback) {
 function _onInitAuthSuccess(data) {
   console.log('init auth returns:', data);
 
-  if (data.threeDSServerCallbackUrl && data.authUrl) {
-
-    serverTransId = data.threeDSServerTransID;
-    $('<iframe id="' + "3ds_" + iframeId
-        + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
-        + data.threeDSServerCallbackUrl + '"></iframe>')
-    .appendTo(iframeContainer);
-
-    if (data.monUrl) {
-      // optionally append the monitoring iframe
-      $('<iframe id="' + "mon_" + iframeId
-          + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
-          + data.monUrl + '"></iframe>')
-      .appendTo(iframeContainer);
-    }
-
-  } else {
+  if (!data.authUrl) {
     _onError(data);
+    return;
+  }
+
+  serverTransId = data.threeDSServerTransID;
+
+  if (_authData.skipAutoBrowserInfoCollect) {
+    // If BrowserInfo collection is skipped, 3DSMethod can still be executed
+    if (data.threeDSServerCallbackUrl) {
+      executeIframes(data)
+    } else {
+      // If 3DSMethod is not available, go straight to Auth call
+      _doAuth(data.threeDSRequestorTransID, _authData.browserInfoCollected)
+    }
+  } else {
+    // Execute iframes as normal and use default BrowserInfo collection
+    if (data.threeDSServerCallbackUrl) {
+      executeIframes(data)
+    } else {
+      _onError(data);
+    }
   }
 }
 
@@ -264,8 +272,13 @@ function _doAuth(transId, param) {
   $("#3ds_" + iframeId).remove();
 
   var authData = _authData;
-  //set the returned param to browserInfo
-  authData.browserInfo = param;
+  if (!authData.skipAutoBrowserInfoCollect) {
+    // If skipAutoBrowserInfoCollect is not used, collect BrowserInfo as normal
+    authData.browserInfo = param;
+  }
+
+  // Remove skipAutoBrowserInfoCollect as it is not required in Auth call
+  delete authData.skipAutoBrowserInfoCollect;
   authData.threeDSRequestorTransID = transId;
   authData.threeDSServerTransID = serverTransId;
   console.log("authData: ", authData);
@@ -519,5 +532,24 @@ function _onError(error) {
     error["New feature"] = "This feature is only supported by ActiveServer v1.1.2+";
   }
   _callbackFn("onError", error);
+}
+
+/**
+ * Method to execute both 3DSServerCallback and monUrl iframes, if available
+ * @param data
+ */
+function executeIframes(data) {
+  $('<iframe id="' + "3ds_" + iframeId
+      + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
+      + data.threeDSServerCallbackUrl + '"></iframe>')
+  .appendTo(iframeContainer);
+
+  if (data.monUrl) {
+    // Optionally append the monitoring iframe
+    $('<iframe id="' + "mon_" + iframeId
+        + '" width="0" height="0" style="border:0;visibility: hidden;" src="'
+        + data.monUrl + '"></iframe>')
+    .appendTo(iframeContainer);
+  }
 }
 

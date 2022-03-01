@@ -14,10 +14,8 @@
 * Written by GPayments<techsupport@gpayments.com>, 2020
 ************************************************************************/
 
-using GPayments.Requestor.TestLab.Helpers;
 using GPayments.Requestor.TestLab.Models.dto;
 using System;
-using System.Web;
 using System.Web.Http;
 
 namespace GPayments.Requestor.TestLab.Controllers
@@ -87,7 +85,7 @@ namespace GPayments.Requestor.TestLab.Controllers
         }
 
         [HttpPost, Route("v2/auth/enrol")]
-        public Message enrolTest([System.Web.Http.FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
+        public Message enrolTest([FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
         {
             return authServiceV2.enrol(transType, request);
         }

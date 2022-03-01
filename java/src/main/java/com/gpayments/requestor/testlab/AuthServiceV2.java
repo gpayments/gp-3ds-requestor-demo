@@ -72,6 +72,7 @@ public class AuthServiceV2 {
     //Send data to ActiveServer to Initialise authentication (Step 3)
     //Get the response data from ActiveServer (Step 4)
     Message response = sendInitAuthRequest(transType, request, session);
+    response.put(THREE_DS_REQUESTOR_TRANS_ID, transId);
     logger.info("initAuthResponseBRW: \n{}", response);
 
     return response;

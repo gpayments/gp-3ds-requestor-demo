@@ -8,6 +8,13 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.5 (compatible with ActiveServer v2.0.7)
+* Added browser info collection tab
+    * **Use RBC**, 3DS Requestor Browser Info Collection option to set `skipAutoBrowserInfoCollect=true`
+    * Input for collected info
+* Added new demo code for browser info collection for Java and PHP, in `BrowserInfoController`
+* Updated the main controller for Go and C#
+
 ### Version 2.4 (compatible with ActiveServer v2.0.6)
 * Exclude empty fields in 3DS1 auth form
 * Auto convert purchaseAmount to minor units without decimal

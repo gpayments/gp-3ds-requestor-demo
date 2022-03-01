@@ -136,7 +136,7 @@ namespace GPayments.Requestor.TestLab.Controllers
         }
 
         [HttpPost, Route("v1/auth/enrol")]
-        public Message enrolTest([System.Web.Http.FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
+        public Message enrolTest([FromBody] Message request, [FromUri(Name = "trans-type")] string transType = null)
         {
             String enrolUrl = Config.AsAuthUrl + "/api/v1/auth/enrol";
 

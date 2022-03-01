@@ -29,6 +29,7 @@ require_once "controllers/AuthControllerV1.php";
 require_once "services/AuthServiceV2.php";
 require_once "controllers/AuthControllerV2.php";
 require_once "controllers/MainController.php";
+require_once "controllers/BrowserInfoController.php";
 require_once "threeds1/ThreeDS1Service.php";
 require_once "threeds1/MainController3DS1.php";
 

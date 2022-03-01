@@ -18,7 +18,6 @@ using GPayments.Requestor.TestLab.Helpers;
 using GPayments.Requestor.TestLab.Models.dto;
 using System;
 using System.Dynamic;
-using System.Linq;
 using System.Web.Mvc;
 
 namespace GPayments.Requestor.TestLab.Controllers
@@ -91,6 +90,26 @@ namespace GPayments.Requestor.TestLab.Controllers
             model.callbackUrl = Config.BaseUrl;
             model.serverUrl = Config.AsAuthUrl;
             return View(model);
+        }
+        
+        /**
+         * A separate endpoint with business logic to demonstrate server-side BrowserInfo collection
+         */
+        [HttpGet, Route("v2/auth/brw/info")]
+        public ActionResult CollectBrowserInfo()
+        {
+            // Simplified version of obtaining the request IP address
+            string ipAddress = Request.ServerVariables["REMOTE_ADDR"];
+            if (ipAddress.StartsWith("["))
+            {
+                ipAddress = "127.0.0.1";
+            }
+            
+            dynamic model = new ExpandoObject();
+            model.browserIP = ipAddress;
+            model.browserUserAgent = Request.Headers["User-Agent"];
+            model.browserAcceptHeader = Request.Headers["Accept"];
+            return View("brw_info_collect", model);
         }
 
         [HttpGet, Route("v1/result")]

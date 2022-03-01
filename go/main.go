@@ -113,6 +113,7 @@ func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 	checkoutTpl := loadTemplate("web/checkout.html", fp)
 	notify3DSEventsTpl := loadTemplate("web/notify_3ds_events.html", fp)
 	noscriptTpl := loadTemplate("web/no_script.html", fp)
+	brwInfoTpl := loadTemplate("web/brw_info_collect.html", fp)
 
 	//v1 process and result pages
 	resultTplv1 := loadTemplate("web/v1/result.html", fp)
@@ -215,8 +216,8 @@ func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 
 		case "3DSMethodHasError":
 
-      //Event 3DSMethodHasError is only for logging and troubleshooting purpose, this demo
-      //sets the callbackName to be _NA so the frontend won't process it.
+			//Event 3DSMethodHasError is only for logging and troubleshooting purpose, this demo
+			//sets the callbackName to be _NA so the frontend won't process it.
 			callbackName = "_NA"
 
 		default:
@@ -264,6 +265,20 @@ func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 		} else {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid callback event"})
 		}
+	})
+
+	r.GET("/v2/auth/brw/info", func(c *gin.Context) {
+
+		// Simplified version of obtaining the request IP address
+		ipAddress := c.Request.RemoteAddr
+		if strings.HasPrefix(ipAddress, "[") {
+			ipAddress = "127.0.0.1"
+		}
+
+		renderPage(gin.H{"browserAcceptHeader": c.Request.Header.Get("Accept"),
+			"browserUserAgent": c.Request.UserAgent(), "browserIP": ipAddress},
+			brwInfoTpl, c)
+
 	})
 
 }

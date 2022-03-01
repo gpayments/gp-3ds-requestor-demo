@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ActiveServer - 3DSecure 2.0 Authentication</title>
+</head>
+
+<body>
+<form id="browserInfoForm">
+  <input type="hidden" name="browserIP" value="{{browserIP}}">
+  <input type="hidden" name="browserUserAgent" value="{{browserUserAgent}}">
+  <input type="hidden" name="browserAcceptHeader" value="{{browserAcceptHeader}}">
+</form>
+
+</body>
+</html>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script>
+  window.onload = function () {
+    parent.document.getElementById('brwInfoInput').value =
+        JSON.stringify(collectLocalBrowserInfoAndConvertToJson($('#browserInfoForm')), null,'\t');
+  }
+
+  function collectLocalBrowserInfoAndConvertToJson(form) {
+    const json = {};
+    json.browserTZ = new Date().getTimezoneOffset();
+    json.browserColorDepth = screen.colorDepth;
+    json.browserLanguage = navigator.language;
+    json.browserJavaEnabled = navigator.javaEnabled();
+    json.browserScreenWidth = screen.width;
+    json.browserScreenHeight = screen.height;
+
+    const array = form.serializeArray();
+    $.each(array, function () {
+      json[this.name] = this.value || "";
+    });
+    return json;
+  }
+</script>

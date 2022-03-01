@@ -19,7 +19,6 @@ using GPayments.Requestor.TestLab.Models.dto;
 using System;
 using System.Collections.Generic;
 using System.Web;
-using System.Web.Http;
 
 namespace GPayments.Requestor.TestLab.Controllers
 {
@@ -50,6 +49,7 @@ namespace GPayments.Requestor.TestLab.Controllers
             //Send data to ActiveServer to Initialise authentication (Step 3)
             //Get the response data from ActiveServer (Step 4)
             Message response = sendInitAuthRequest(transType, request);
+            response[THREE_DS_REQUESTOR_TRANS_ID] = transId;
             logger.Info(string.Format("initAuthResponseBRW: \n{0}", response));
 
             return response;

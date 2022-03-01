@@ -179,6 +179,7 @@
     <Content Include="Views\Main\3ri.html" />
     <Content Include="Views\Main\app.html" />
     <Content Include="Views\Main\brw.html" />
+    <Content Include="Views\Main\brw_info_collect.html" />
     <Content Include="Views\Main\checkout.html" />
     <Content Include="Views\Main\contents\acct_info.html" />
     <Content Include="Views\Main\contents\authentication_info.html" />
