@@ -8,6 +8,9 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.6 (compatible with ActiveServer v2.0.8)
+* Added support for card scheme overriding through cardScheme parameter
+
 ### Version 2.5 (compatible with ActiveServer v2.0.7)
 * Added browser info collection tab
     * **Use RBC**, 3DS Requestor Browser Info Collection option to set `skipAutoBrowserInfoCollect=true`

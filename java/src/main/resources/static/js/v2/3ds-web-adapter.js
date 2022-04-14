@@ -101,6 +101,14 @@ function brw(authData, container, callbackFn, options, transType) {
     initAuthData.skipAutoBrowserInfoCollect = true;
   }
 
+  /*
+   To use a specific cardScheme, for example, eftpos instead of Visa,
+   it can be specified in the InitAuth call
+   */
+  if (authData.cardScheme) {
+    initAuthData.cardScheme = authData.cardScheme;
+  }
+
   console.log('init authentication', initAuthData);
 
   //Send data to /auth/init to do Initialise authentication
@@ -277,8 +285,17 @@ function _doAuth(transId, param) {
     authData.browserInfo = param;
   }
 
-  // Remove skipAutoBrowserInfoCollect as it is not required in Auth call
-  delete authData.skipAutoBrowserInfoCollect;
+  /*
+   As this method is only used for BRW transactions and the following fields
+   are not required in the Auth call, they can be removed from the authData.
+   */
+  if (authData.skipAutoBrowserInfoCollect) {
+    delete authData.skipAutoBrowserInfoCollect;
+  }
+  if (authData.cardScheme) {
+    delete authData.cardScheme;
+  }
+
   authData.threeDSRequestorTransID = transId;
   authData.threeDSServerTransID = serverTransId;
   console.log("authData: ", authData);
