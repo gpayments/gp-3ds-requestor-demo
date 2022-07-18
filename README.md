@@ -8,6 +8,10 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.7 (compatible with ActiveServer v2.0.9)
+* Updated the requestor to specify Base64Url encoded `threeDSSessionData`
+* Minor UI changes
+
 ### Version 2.6 (compatible with ActiveServer v2.0.8)
 * Added support for card scheme overriding through cardScheme parameter
 
