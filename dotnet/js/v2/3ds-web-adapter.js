@@ -344,6 +344,9 @@ function _onDoAuthSuccess(data) {
 function startChallenge(data) {
 
   if (data.challengeUrl) {
+    if (_options.threeDSSessionData) {
+      data.challengeUrl = appendTDSSessionData(data.challengeUrl);
+    }
     challengeResultReady = false;
     _callbackFn("onChallengeStart");
     //create the iframe
@@ -364,6 +367,15 @@ function startChallenge(data) {
   } else {
     _onError({"Error": "Invalid Challenge Callback Url"});
   }
+}
+
+function appendTDSSessionData(challengeUrl) {
+  const encodedThreeDSSessionData = Base64Url.encode(_options.threeDSSessionData);
+
+  // Important: We call encodeURIComponent() here to avoid invalid Base64Url
+  // characters as well as convert any padding to URL friendly characters.
+  return challengeUrl + "&tds-session-data=" +
+      encodeURIComponent(encodedThreeDSSessionData);
 }
 
 function _onCancelSuccess(data) {
@@ -569,4 +581,3 @@ function executeIframes(data) {
     .appendTo(iframeContainer);
   }
 }
-

@@ -146,6 +146,7 @@ class MainController
         $requestorTransId = $_POST["requestorTransId"];
         $callbackType = $_POST["event"];
         $param = (isset($_POST["param"]) && !empty($_POST["param"])) ? $_POST["param"] : "";
+        $threeDSSessionData = $_POST["threeDSSessionData"];
 
         if ($callbackType === "3DSMethodFinished") {
 
@@ -173,6 +174,7 @@ class MainController
         $model["transId"] = $requestorTransId;
         $model["callbackName"] = $callbackName;
         $model["callbackParam"] = $param;
+        $model["callbackThreeDSSessionData"] = $threeDSSessionData;
 
         $this->templateResolver->_render("notify_3ds_events", $model);
     }

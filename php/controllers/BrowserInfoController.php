@@ -18,7 +18,7 @@
  */
 class BrowserInfoController
 {
-    private TemplateResolver $templateResolver;
+    private $templateResolver;
 
     function __construct(TemplateResolver $templateResolver)
     {

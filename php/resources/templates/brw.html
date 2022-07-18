@@ -273,10 +273,6 @@
                              value=""
                       />
                     </dd>
-                    <dt class="col-sm-4">Overridden Merchant Name</dt>
-                    <dd class="col-sm-8">
-                      <input type="text" id="merchantName" class="form-control" value=""/>
-                    </dd>
 
                     <dt class="col-sm-4">3DS Requestor Auth Method Indicator</dt>
                     <dd class="col-sm-8">
@@ -378,11 +374,21 @@
                     override the values set in the merchant profile for the following fields,
                     however the "Allow merchant override" feature must first be enabled in
                     the ActiveServer security settings page.
+                    <br><br>
+                    The Merchant Name field is the highest priority. If it is not presented,
+                    Active Server will try to load the DS-specific overriding value from the merchant
+                    profile, if that is also not presented, then the default Merchant Name from
+                    the merchant profile will be used.
                   </dt>
 
                   <dt class="col-sm-4">Override Acquirer BIN</dt>
                   <dd class="col-sm-8">
                     <input type="text" id="acquirerBIN" class="form-control"/>
+                  </dd>
+
+                  <dt class="col-sm-4">Override Merchant Name</dt>
+                  <dd class="col-sm-8">
+                    <input type="text" id="merchantName" class="form-control" value=""/>
                   </dd>
 
                   <dt class="col-sm-4">Override 3DS Requestor Name</dt>
@@ -440,6 +446,23 @@
                       <option value="04">600 x 400 (04)</option>
                       <option value="05">Full screen (05)</option>
                     </select>
+                  </dd>
+
+                  <dt class="col-sm-12 text-secondary"
+                      style="padding-top: .5rem;padding-bottom: .5rem">3DS requestor can specify here any arbitrary session data it would
+                    like to access after the final CRes has been received. It should be encoded to
+                    Base64Url and will be passed through the challenge flow unchanged,
+                    then returned to the requestor for re-use.
+                    <br><br>
+                    Important: Invalid session data will be rejected by Active Server to ensure
+                    malicious inputs are not passed along to other components in the 3DS chain.
+                    Any padding will be converted to URL friendly characters, please see the
+                    3ds-web-adapter for more details.
+                  </dt>
+
+                  <dt class="col-sm-4">3DS Session Data</dt>
+                  <dd class="col-sm-8">
+                    <input type="text" id="threeDSSessionData" class="form-control"/>
                   </dd>
                 </dl>
               </div>
@@ -727,6 +750,10 @@
     var challengeWindowSize = $("#challengeWindowSize").val();
     if (challengeWindowSize) {
       options.challengeWindowSize = challengeWindowSize;
+    }
+    var threeDSSessionData = $('#threeDSSessionData').val();
+    if (threeDSSessionData) {
+      options.threeDSSessionData = threeDSSessionData;
     }
     return options;
   }

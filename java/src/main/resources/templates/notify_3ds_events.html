@@ -30,16 +30,19 @@
   <input type="hidden" id="notifyCallback" name="notifyCallback" value={{callbackName}}>
   <input type="hidden" id="transId" name="transId" value={{transId}}>
   <input type="hidden" id="param" name="param" value={{callbackParam}}>
+  <input type="hidden" id="threeDSSessionData" name="threeDSSessionData"
+         value={{callbackThreeDSSessionData}}>
 </form>
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"
         integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>
 <script>
-  //notify parent check out page to proceed with rest procedures.
-
+  // Save threeDSSessionData to sessionStorage to display on result page if present
+  sessionStorage.setItem("threeDSSessionData", $('#threeDSSessionData').val());
+  // Notify parent check out page to proceed with rest procedures.
   var callbackFn = parent[$('#notifyCallback').val()];
-  //callbackFn is defined in 3ds-notify handler method
+  // callbackFn is defined in 3ds-notify handler method
   if (typeof callbackFn === 'function') {
     callbackFn($('#transId').val(), $('#param').val());
   }

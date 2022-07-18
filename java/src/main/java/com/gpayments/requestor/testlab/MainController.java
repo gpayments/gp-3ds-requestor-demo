@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -125,6 +126,7 @@ public class MainController {
       @RequestParam("requestorTransId") String transId,
       @RequestParam("event") String callbackType,
       @RequestParam(name = "param", required = false) String param,
+      @RequestParam(name = "threeDSSessionData", required = false) String threeDSSessionData,
       Model model) {
 
     String callbackName;
@@ -163,6 +165,11 @@ public class MainController {
     model.addAttribute(TRANS_ID, transId);
     model.addAttribute("callbackName", callbackName);
     model.addAttribute("callbackParam", param);
+
+    // threeDSSessionData will only be available in the Challenge result callbacks.
+    // The code below is to avoid a Mustache template error when the threeDSSessionData is null
+    model.addAttribute("callbackThreeDSSessionData",
+        StringUtils.hasLength(threeDSSessionData) ? threeDSSessionData : "");
 
     return "notify_3ds_events";
   }

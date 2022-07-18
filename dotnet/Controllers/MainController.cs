@@ -130,7 +130,7 @@ namespace GPayments.Requestor.TestLab.Controllers
             string transId = Request.Params["requestorTransId"];
             string callbackType = Request.Params["event"];
             string param = Request.Params["param"];
-
+            string threeDSSessionData = Request.Params["threeDSSessionData"];
             String callbackName;
             if ("3DSMethodFinished".Equals(callbackType))
                 callbackName = "_on3DSMethodFinished";
@@ -155,6 +155,7 @@ namespace GPayments.Requestor.TestLab.Controllers
             model.transId = transId;
             model.callbackName = callbackName;
             model.callbackParam = param;
+            model.callbackThreeDSSessionData = threeDSSessionData;
 
             return View("notify_3ds_events", model);
         }

@@ -163,6 +163,11 @@
       data.transStatusReason = formatTransStatusReason(data.transStatusReason);
     }
 
+    let threeDSSessionData = sessionStorage.getItem("threeDSSessionData");
+    if (threeDSSessionData !== 'null' && threeDSSessionData) {
+      data.threeDSSessionData = Base64Url.decode(threeDSSessionData);
+    }
+
     var toShow = "<dl class='row'>";
     Object.keys(data).forEach(function (k) {
       toShow = toShow + "<dt class='col-sm-4'>" + k + "</dt>" + "<dd class='col-sm-8'>" + data[k]

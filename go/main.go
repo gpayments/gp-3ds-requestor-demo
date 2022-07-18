@@ -195,6 +195,8 @@ func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 
 		param := c.PostForm("param")
 
+		threeDSSessionData := c.PostForm("threeDSSessionData")
+
 		var callbackName string
 
 		switch event {
@@ -234,6 +236,7 @@ func mainController(r *gin.Engine, config *Config, fp *mustache.FileProvider) {
 			"transId":       transId,
 			"callbackName":  callbackName,
 			"callbackParam": param,
+			"callbackThreeDSSessionData": threeDSSessionData,
 		}, notify3DSEventsTpl, c)
 	})
 

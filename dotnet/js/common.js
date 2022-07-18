@@ -470,3 +470,25 @@ function showActionButton(buttonId, buttonText, onclickFnName) {
   );
 
 }
+
+// Functions to support encoding and decoding of Unicode characters to Base64Ur.
+// Active Server will reject any invalid encoding to ensure malicious input
+// is not passed on to other components in the 3DS chain.
+let Base64Url = {
+  base64ToUrlChars: {'\+': '-', '\/': '_'},
+  urlToBase64Chars: {'-': '\+', '_': '\/'},
+
+  encode: function (string) {
+    return btoa(encodeURIComponent(string).replace(/%([0-9A-F]{2})/g,
+        function toSolidBytes(match, p1) {
+          return String.fromCharCode('0x' + p1);
+        })).replace(/[+\/]/g, c => Base64Url.base64ToUrlChars[c]);
+  },
+
+  decode: function (string) {
+    return decodeURIComponent(atob(string.replace(/[\-_]/g,
+        c => Base64Url.urlToBase64Chars[c])).split('').map(function (c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+  }
+};
