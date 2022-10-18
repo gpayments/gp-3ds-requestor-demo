@@ -29,6 +29,13 @@ var cards = [
         expiryDate: 2508
       },
       {
+        name: "frictionlessWithTdsMethod",
+        description: "Frictionless (with 3DS Method)",
+        label: "Frictionless (with 3DS Method)",
+        cardNumber: 4100000000600008,
+        expiryDate: 2508
+      },
+      {
         name: "challenge",
         description: "Challenge authentication",
         label: "Challenge",
@@ -74,6 +81,13 @@ var cards = [
         description: "Frictionless authentication",
         label: "Frictionless",
         cardNumber: 5100000000000107,
+        expiryDate: 2508
+      },
+      {
+        name: "frictionlessWithTdsMethod",
+        description: "Frictionless (with 3DS Method)",
+        label: "Frictionless (with 3DS Method)",
+        cardNumber: 5100000000600005,
         expiryDate: 2508
       },
       {
@@ -125,6 +139,13 @@ var cards = [
         expiryDate: 2508
       },
       {
+        name: "frictionlessWithTdsMethod",
+        description: "Frictionless (with 3DS Method)",
+        label: "Frictionless (with 3DS Method)",
+        cardNumber: 3528000000600004,
+        expiryDate: 2508
+      },
+      {
         name: "challenge",
         description: "Challenge authentication",
         label: "Challenge",
@@ -173,6 +194,13 @@ var cards = [
         expiryDate: 2508
       },
       {
+        name: "frictionlessWithTdsMethod",
+        description: "Frictionless (with 3DS Method)",
+        label: "Frictionless (with 3DS Method)",
+        cardNumber: 340000000600006,
+        expiryDate: 2508
+      },
+      {
         name: "challenge",
         description: "Challenge authentication",
         label: "Challenge",
@@ -218,6 +246,13 @@ var cards = [
         description: "Frictionless authentication",
         label: "Frictionless",
         cardNumber: 6440000000000104,
+        expiryDate: 2508
+      },
+      {
+        name: "frictionlessWithTdsMethod",
+        description: "Frictionless (with 3DS Method)",
+        label: "Frictionless (with 3DS Method)",
+        cardNumber: 6440000000600002,
         expiryDate: 2508
       },
       {

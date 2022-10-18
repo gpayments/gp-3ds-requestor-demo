@@ -8,6 +8,10 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.8 (compatible with ActiveServer v2.0.11)
+* Updated `sdkEncData` on the App page
+* Added scenarios with 3DS Method
+
 ### Version 2.7 (compatible with ActiveServer v2.0.9)
 * Updated the requestor to specify Base64Url encoded `threeDSSessionData`
 * Minor UI changes
