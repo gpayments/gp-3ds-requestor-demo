@@ -8,6 +8,10 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 2.9 (compatible with ActiveServer v2.0.11)
+* Updated sdkEncData on the App page
+* Removed form validation for phone number
+
 ### Version 2.8 (compatible with ActiveServer v2.0.11)
 * Updated `sdkEncData` on the App page
 * Added scenarios with 3DS Method
