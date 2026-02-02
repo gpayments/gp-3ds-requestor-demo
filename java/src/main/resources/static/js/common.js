@@ -159,37 +159,28 @@ function getCardHolderInfo(channel) {
     cardHolderInfo.cardholderName = cardholderName;
   }
 
-  cardHolderInfo.mobilePhone = {};
   var mobileNumberSubscriber = $('#mobileNumberSubscriber').val();
-  if (mobileNumberSubscriber) {
+  var mobileNumberCountryCode = $('#mobileNumberCountryCode').val();
+  if (mobileNumberSubscriber || mobileNumberCountryCode) {
+    cardHolderInfo.mobilePhone = {};
+    cardHolderInfo.mobilePhone.cc = mobileNumberCountryCode;
     cardHolderInfo.mobilePhone.subscriber = mobileNumberSubscriber;
   }
 
-  var mobileNumberCountryCode = $('#mobileNumberCountryCode').val();
-  if (mobileNumberCountryCode) {
-    cardHolderInfo.mobilePhone.cc = mobileNumberCountryCode;
-  }
-
-  cardHolderInfo.homePhone = {};
   var homeNumberSubscriber = $('#homeNumberSubscriber').val();
-  if (homeNumberSubscriber) {
+  var homeNumberCountryCode = $('#homeNumberCountryCode').val();
+  if (homeNumberSubscriber || homeNumberCountryCode) {
+    cardHolderInfo.homePhone = {};
+    cardHolderInfo.homePhone.cc = homeNumberCountryCode;
     cardHolderInfo.homePhone.subscriber = homeNumberSubscriber;
   }
 
-  var homeNumberCountryCode = $('#homeNumberCountryCode').val();
-  if (homeNumberCountryCode) {
-    cardHolderInfo.homePhone.cc = homeNumberCountryCode;
-  }
-
-  cardHolderInfo.workPhone = {};
   var workNumberSubscriber = $('#workNumberSubscriber').val();
-  if (workNumberSubscriber) {
-    cardHolderInfo.workPhone.subscriber = workNumberSubscriber;
-  }
-
   var workNumberCountryCode = $('#workNumberCountryCode').val();
-  if (workNumberCountryCode) {
+  if (workNumberSubscriber || workNumberCountryCode) {
+    cardHolderInfo.workPhone = {};
     cardHolderInfo.workPhone.cc = workNumberCountryCode;
+    cardHolderInfo.workPhone.subscriber = workNumberSubscriber;
   }
 
   var email = $('#email').val();

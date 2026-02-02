@@ -73,11 +73,14 @@ public class AuthControllerV2 {
   /**
    * Receives the Request for authentication result request (Step 15(F) and Step 20(C)) Send data to
    * ActiveServer to Retrieve Authentication Results
+   *
+   * @param serverTransId The server transaction ID
+   * @param extraParams Experimental params is for GPayments internal use only - not required, can be safely ignored
    */
   @ResponseBody
   @GetMapping("/v2/auth/brw/result")
-  public Message resultBRW(@RequestParam("txid") String serverTransId) {
-    return authServiceV2.getBRWResult(serverTransId);
+  public Message resultBRW(@RequestParam("txid") String serverTransId, @RequestParam(value = "ep", required = false) String extraParams) {
+    return authServiceV2.getBRWResult(serverTransId, extraParams);
   }
 
   @PostMapping("/v2/auth/3ri")
@@ -87,9 +90,15 @@ public class AuthControllerV2 {
     return authServiceV2.threeRI(transType, request);
   }
 
+  /**
+   * Retrieves the 3RI authentication result.
+   *
+   * @param serverTransId The server transaction ID
+   * @param extraParams Experimental params is for GPayments internal use only - not required, can be safely ignored
+   */
   @GetMapping("/v2/auth/3ri/result")
-  public Message result3RI(@RequestParam("txid") String serverTransId) {
-    return authServiceV2.get3RIResult(serverTransId);
+  public Message result3RI(@RequestParam("txid") String serverTransId, @RequestParam(value = "ep", required = false) String extraParams) {
+    return authServiceV2.get3RIResult(serverTransId, extraParams);
   }
 
   @PostMapping("/v2/auth/app")

@@ -109,6 +109,11 @@ function brw(authData, container, callbackFn, options, transType) {
     initAuthData.cardScheme = authData.cardScheme;
   }
 
+  // Experimental params is for GPayments internal use only - not required, can be safely ignored
+  if (authData.extraParams){
+    initAuthData.extraParams = authData.extraParams;
+  }
+
   console.log('init authentication', initAuthData);
 
   //Send data to /auth/init to do Initialise authentication
@@ -318,6 +323,10 @@ function _onDoAuthSuccess(data) {
           var sendData = {};
           sendData.threeDSServerTransID = serverTransId;
           sendData.status = _options.cancelReason;
+          // Experimental params is for GPayments internal use only - not required, can be safely ignored
+          if (_authData.extraParams != null){
+            sendData.extraParams = _authData.extraParams;
+          }
           doPost("/v2/auth/challenge/status", sendData, _onCancelSuccess,
               _onCancelError)
         } else {
@@ -464,7 +473,12 @@ function get3riResult(threeDSServerTransID, callbackFn) {
 }
 
 function _doGetResult(url, threeDSServerTransID, callbackFn, eventType) {
-  $.get(url, {txid: threeDSServerTransID})
+  let params = {txid: threeDSServerTransID};
+  // Experimental params is for GPayments internal use only - not required, can be safely ignored
+  if(_authData.extraParams != null){
+   params.ep = _authData.extraParams;
+  }
+  $.get(url, params)
   .done(function (data) {
     console.log('returns:', data);
     if (data.transStatus) {

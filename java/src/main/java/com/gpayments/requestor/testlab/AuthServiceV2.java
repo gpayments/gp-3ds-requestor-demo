@@ -31,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -99,6 +100,8 @@ public class AuthServiceV2 {
       initAuthUrl = initAuthUrl + "?trans-type=prod";
     }
 
+    initAuthUrl = createUrlWithExtraParams(initAuthUrl, request);
+
     logger.info("initAuthRequest on url: {}, body: \n{}", initAuthUrl, request);
 
     Message response = sendRequest(initAuthUrl, request, HttpMethod.POST);
@@ -149,7 +152,9 @@ public class AuthServiceV2 {
   }
 
   public Message challengeStatus(Message request) {
-    String challengeStatusUrl = config.getAsAuthUrl() + "/api/v2/auth/challenge/status";
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    String challengeStatusUrl = createUrlWithExtraParams(config.getAsAuthUrl() + "/api/v2/auth/challenge/status", request) ;
+
     logger.info("request challenge status API {}, body: \n{}", challengeStatusUrl, request);
 
     Message response =
@@ -159,11 +164,16 @@ public class AuthServiceV2 {
     return response;
   }
 
-  public Message getBRWResult(String serverTransId) {
+  public Message getBRWResult(String serverTransId, String extraParams) {
     //ActiveServer url for Retrieve Results
     String resultUrl = config.getAsAuthUrl() +
-        "/api/v2/auth/brw/result?threeDSServerTransID=" +
-        serverTransId;
+            "/api/v2/auth/brw/result?threeDSServerTransID=" + serverTransId;
+
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    if(StringUtils.hasLength(extraParams)){
+      resultUrl = resultUrl + "&" + extraParams;
+    }
+
 
     //Get authentication result from ActiveServer
     Message response = sendRequest(resultUrl, null, HttpMethod.GET);
@@ -184,6 +194,9 @@ public class AuthServiceV2 {
       threeRIUrl = threeRIUrl + "?trans-type=prod";
     }
 
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    threeRIUrl = createUrlWithExtraParams(threeRIUrl, request);
+
     logger.info("authRequest3RI on url: {}, body: \n{}", threeRIUrl, request);
 
     Message response =
@@ -192,11 +205,23 @@ public class AuthServiceV2 {
     return response;
   }
 
-  public Message get3RIResult(String serverTransId) {
+  /**
+   * Retrieves the 3RI authentication result.
+   *
+   * @param serverTransId The server transaction ID
+   * @param extraParams Experimental params is for GPayments internal use only - not required, can be safely ignored
+   * @return The authentication result message
+   */
+  public Message get3RIResult(String serverTransId, String extraParams) {
 
     String resultUrl = config.getAsAuthUrl() +
         "/api/v2/auth/3ri/result?threeDSServerTransID=" +
         serverTransId;
+
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    if(StringUtils.hasLength(extraParams)){
+      resultUrl = resultUrl + "&" + extraParams;
+    }
 
     Message response =
         sendRequest(resultUrl, null, HttpMethod.GET);
@@ -219,6 +244,9 @@ public class AuthServiceV2 {
       appAuthUrl = appAuthUrl + "?trans-type=prod";
     }
 
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    appAuthUrl = createUrlWithExtraParams(appAuthUrl, request);
+
     logger.info("appAuthRequest on url: {}, body: \n{}", appAuthUrl, request);
 
     Message response =
@@ -235,6 +263,9 @@ public class AuthServiceV2 {
     if ("prod".equals(transType)) {
       enrolUrl = enrolUrl + "?trans-type=prod";
     }
+
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    enrolUrl = createUrlWithExtraParams(enrolUrl, request);
 
     logger.info("enrol on url: {}, body: \n{}", enrolUrl, request);
 
@@ -380,7 +411,8 @@ public class AuthServiceV2 {
 
     String serverTransId = (String) getSessionAttribute(INIT_AUTH_RESPONSE, session)
         .get(THREE_DS_SERVER_TRANS_ID);
-    Message response = getBRWResult(serverTransId);
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    Message response = getBRWResult(serverTransId, null);
     model.addAttribute("result", response);
     return "no_script_results";
   }
@@ -392,5 +424,20 @@ public class AuthServiceV2 {
     }
   }
 
+  /**
+   * Experimental params is for GPayments internal use only - not required, can be safely ignored.
+   * Appends extra parameters to the given URL if present.
+   *
+   * @param url The base URL to append parameters to
+   * @param request The request message that may contain "extraParams" key
+   * @return The URL with extra parameters appended, or the original URL if no extra params exist
+   */
+  private String createUrlWithExtraParams(String url, Message request){
+    if (request != null && request.containsKey("extraParams")){
+      String extraParam = (String) request.get("extraParams");
+      return url + (url.contains("?") ? "&" : "?") + extraParam;
+    }
+    return url;
+  }
 
 }

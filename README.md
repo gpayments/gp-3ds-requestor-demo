@@ -8,6 +8,9 @@ The master branch always contains the latest 3DS Requestor demo code version. Fo
 
 ## Release notes
 
+### Version 3.0 (compatible with ActiveServer v2.0.x, v3.1.x)
+* Update default Cardholder Expiry Date
+
 ### Version 2.9 (compatible with ActiveServer v2.0.11)
 * Updated sdkEncData on the App page
 * Removed form validation for phone number

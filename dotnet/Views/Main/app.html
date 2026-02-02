@@ -131,7 +131,7 @@
     acctID: "personal account",
     acctType: "01",
     cardholderName: "Test Card",
-    cardExpiryDate: "2508",
+    cardExpiryDate: moment().add(1, 'year').format('YYMM'), // Automatic extend date + 1 year for testing purposes
     transType: "01",
     challengeInd: "01",
     purchaseDate: "20200409093228",

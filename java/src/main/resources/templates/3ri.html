@@ -255,6 +255,11 @@
                       <input type="text" id="whiteListStatusSource" class="form-control"
                              value=""/>
                     </dd>
+                    <!-- Experimental params is for GPayments internal use only - not required, can be safely ignored -->
+                    <dt class="col-sm-4" data-toggle="tooltip" data-placement="top" title="This field is for GPayments internal use only. This field is not required, you can safely ignore it. For any questions, please contact GPayments support.">Experimental Params <i class="fas fa-info-circle text-muted"></i></dt>
+                    <dd class="col-sm-8">
+                      <input  type="text" id="extraParams" class="form-control"/>
+                    </dd>
                   </dl>
                 </div>
               </div>
@@ -466,10 +471,18 @@
       authData.merchantRiskIndicator = merchantRiskIndicator;
     }
 
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    var extraParams = $('#extraParams').val();
+    if (extraParams){
+      authData.extraParams = extraParams;
+    }
     return authData;
   }
 
   $(document).ready(function () {
+    // Initialize Bootstrap tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+
     var apiVersion = getApiVersion();
     updateActionButtonText(apiVersion, $("#testButton"), "Test 3RI");
   });

@@ -71,6 +71,18 @@
                 </dd>
               </dl>
             </div>
+            <div>
+              <br>
+              <h3 class="mb-3">Optional Fields</h3>
+              <hr>
+              <dl class="row">
+                <!-- Experimental params is for GPayments internal use only - not required, can be safely ignored -->
+                <dt class="col-sm-4" data-toggle="tooltip" data-placement="top" title="This field is for GPayments internal use only. This field is not required, you can safely ignore it. For any questions, please contact GPayments support.">Experimental Params <i class="fas fa-info-circle text-muted"></i></dt>
+                <dd class="col-sm-8">
+                  <input  type="text" id="extraParams" class="form-control"/>
+                </dd>
+              </dl>
+            </div>
           </div>
         </div>
 
@@ -148,8 +160,18 @@
       authData.merchantId = merchantId;
     }
 
+    // Experimental params is for GPayments internal use only - not required, can be safely ignored
+    var extraParams = $('#extraParams').val();
+    if (extraParams){
+      authData.extraParams = extraParams;
+    }
     return authData;
   }
+
+  $(document).ready(function () {
+    // Initialize Bootstrap tooltips
+    $('[data-toggle="tooltip"]').tooltip();
+  });
 
 </script>
 </body>
